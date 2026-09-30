@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 — 2026-10-01
+
+- The tour's shortcut offer has a *Choose key…* button: hold your keys (Super, Ctrl, Alt, Shift and a letter, number or F-key), see them live, press Esc to save. If the key is taken nothing is written and it says so.
+- `ui/scripts/bind.sh` takes the key as arguments (`sh bind.sh SUPER_ALT A`), asks for it in a terminal, or picks a free one (`auto`); it writes Lua or `.conf` syntax to match the config, refuses keys that are bound already and anything that is not a modifier plus a plain key.
+
 ## 0.1.1 — 2026-10-01
 
 - The first-run tour offers to add the editor key on Hyprland (`SUPER + G`, or `SUPER SHIFT + G` / `SUPER ALT + G` when that one is taken): one button, nothing is touched until it is pressed. The line is appended to `bindings.conf` (Omarchy) or `hyprland.conf`; a Lua config (`hyprland.lua` / `bindings.lua`) gets a Lua line instead. The work is `ui/scripts/bind.sh`, which can also be run by hand. This is the prompt for installs that have no installer to ask, such as the Omarchy plugin.

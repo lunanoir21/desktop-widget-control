@@ -25,8 +25,8 @@ class Bind(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.home, ignore_errors=True)
 
-    def run_script(self):
-        out = subprocess.run(["sh", SCRIPT], env=self.env, capture_output=True, text=True).stdout.strip()
+    def run_script(self, *args):
+        out = subprocess.run(["sh", SCRIPT, *args], env=self.env, capture_output=True, text=True).stdout.strip()
         return out.split("|")
 
     def write(self, name, text=""):
@@ -90,6 +90,29 @@ class Bind(unittest.TestCase):
         os.remove(os.path.join(self.hypr, "hyprland.lua"))
         self.fake_binds([(64, "G"), (65, "G"), (72, "G"), (68, "G"), (64, "F12"), (65, "F12")])
         self.assertEqual(self.run_script()[0], "taken")
+        self.assertEqual(self.read("hypr", "hyprland.conf"), "")
+
+    def test_a_key_given_in_the_arguments_is_used_as_asked(self):
+        self.write("hyprland.conf", "")
+        self.assertEqual(self.run_script("SUPER_ALT", "a")[:2], ["ok", "SUPER ALT + A"])
+        self.assertIn("bind = SUPER ALT, A, exec,", self.read("hypr", "hyprland.conf"))
+
+    def test_a_key_given_in_the_arguments_goes_into_lua_too(self):
+        self.write("hyprland.lua", "")
+        self.assertEqual(self.run_script("SUPER_SHIFT", "F9")[1], "SUPER SHIFT + F9")
+        self.assertIn('hl.bind("SUPER + SHIFT + F9"', self.read("hypr", "hyprland.lua"))
+
+    def test_nonsense_keys_change_nothing(self):
+        self.write("hyprland.conf", "")
+        for args in (("SUPER", "a;rm"), ("HYPER", "a"), ("", "a"), ("NONE", "a")):
+            self.assertEqual(self.run_script(*args)[0], "bad", args)
+        self.assertEqual(self.read("hypr", "hyprland.conf"), "")
+
+    @unittest.skipUnless(shutil.which("jq"), "needs jq")
+    def test_a_taken_key_asked_for_is_refused_not_replaced(self):
+        self.write("hyprland.conf", "")
+        self.fake_binds([(72, "A")])
+        self.assertEqual(self.run_script("SUPER_ALT", "a")[0], "taken")
         self.assertEqual(self.read("hypr", "hyprland.conf"), "")
 
     def test_running_twice_adds_it_once(self):

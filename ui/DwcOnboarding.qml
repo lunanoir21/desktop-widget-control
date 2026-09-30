@@ -88,6 +88,7 @@ PanelWindow {
         clip: true
 
         FocusScope {
+            id: keys
             anchors.fill: parent
             focus: true
             Keys.onReturnPressed: root.forward(false)
@@ -141,7 +142,7 @@ PanelWindow {
                     onPicked: v => DwcStore.setLanguage(v)
                 }
                 // the two lines that open the editor from a key
-                DwcKeyBind { id: keyBind; visible: root.step === 1 && keyBind.hyprland }
+                DwcKeyBind { id: keyBind; onCaptureEnded: keys.forceActiveFocus(); visible: root.step === 1 && keyBind.hyprland }
                 Column {
                     visible: root.step === 1 && !keyBind.hyprland
                     spacing: 6
