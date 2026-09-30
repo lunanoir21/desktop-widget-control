@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 — unreleased
+## 0.2.0 — 2026-10-01
 
 - New module: *AI limits*, the 5-hour and weekly limits of Claude and Codex as twin rings (outer = 5 hours, inner = week) or LED dots, red above a warning level you set. Codex is read from its own session logs; Claude from a capture of Claude Code's status line (`ui/scripts/claude-statusline.sh`, no network) or, as an opt-in, from the usage endpoint. Numbers that are old say how old; a window whose reset time has passed reads empty.
 - The Claude and OpenAI marks are drawn from Simple Icons (CC0); they are trademarks of their owners and the project is not affiliated with either.
