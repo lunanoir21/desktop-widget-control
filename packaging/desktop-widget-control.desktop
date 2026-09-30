@@ -1,0 +1,23 @@
+[Desktop Entry]
+Type=Application
+Name=Desktop Widget Control
+GenericName=Desktop widgets
+Comment=Live widgets on your desktop, with an editor
+Exec=dwc toggle
+Icon=desktop-widget-control
+Terminal=false
+Categories=Utility;Settings;
+Keywords=widgets;desktop;clock;conky;quickshell;
+Actions=edit;start;tour;
+
+[Desktop Action edit]
+Name=Edit widgets
+Exec=dwc toggle
+
+[Desktop Action start]
+Name=Start the widgets
+Exec=dwc start
+
+[Desktop Action tour]
+Name=Show the tour again
+Exec=dwc tour

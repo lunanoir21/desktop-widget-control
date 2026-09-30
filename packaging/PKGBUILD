@@ -1,0 +1,25 @@
+# Maintainer: luna (@lunanoir21)
+pkgname=desktop-widget-control
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Live desktop widgets for Wayland (Quickshell), with an editor to place and style them'
+arch=('any')
+url='https://github.com/lunanoir21/desktop-widget-control'
+license=('MIT')
+depends=('quickshell' 'qt6-declarative')
+optdepends=('curl: weather and the place picker'
+            'cava: audio visualizer in the media player'
+            'libnotify: pomodoro notifications')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  cd "$pkgname-$pkgver"
+  # Quickshell also looks in $XDG_CONFIG_DIRS, so `quickshell -c desktop-widget-control` just works.
+  install -dm755 "$pkgdir/etc/xdg/quickshell/$pkgname"
+  cp -r shell.qml ui "$pkgdir/etc/xdg/quickshell/$pkgname/"
+  install -Dm755 bin/dwc "$pkgdir/usr/bin/dwc"
+  install -Dm644 packaging/desktop-widget-control.desktop "$pkgdir/usr/share/applications/desktop-widget-control.desktop"
+  install -Dm644 assets/icon.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/desktop-widget-control.svg"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

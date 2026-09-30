@@ -1,0 +1,78 @@
+#!/bin/sh
+# A short front for Desktop Widget Control:  dwc toggle   dwc add media   dwc theme amber
+#
+#     dwc help          list everything it understands
+#
+# Commands that change the running widgets talk to it over IPC, so they need it
+# running (`dwc start`). If you run it some other way, set DWC_QS to reach it,
+# e.g.  DWC_QS="quickshell -p ~/src/desktop-widget-control".
+QS=${DWC_QS:-quickshell -c desktop-widget-control}
+
+running() {
+    # shellcheck disable=SC2086
+    $QS ipc call desktopWidgets status >/dev/null 2>&1
+}
+
+case "${1:-help}" in
+    help|-h|--help)
+        cat <<'HELP'
+dwc start                     start the widgets (in the background)
+dwc stop                      stop them
+dwc restart                   stop and start again
+dwc edit                      open the editor
+dwc done                      close the editor
+dwc toggle                    open it, or close it if it is open (bind this to a key)
+dwc tour [N]                  show the first-run tour again
+dwc modules                   the module ids `add` accepts
+dwc add TYPE [SIZE]           add a widget (SIZE: S, M, L, W or X; omit for the default)
+dwc remove ID
+dwc select ID                 select a widget in the editor
+dwc move ID X Y               move a widget to grid cell X,Y
+dwc center ID [h|v|both]      put a widget in the middle of the screen
+dwc size ID S|M|L|W|X         change a widget's size
+dwc set ID KEY JSON           change an option:  dwc set clock-led-1 seconds true
+dwc style ID KEY JSON         change an appearance option:  dwc style media-1 radius 24
+dwc theme NAME|cycle          moss umbra black graphite paper sand gold amber crimson
+dwc language auto|en|tr
+dwc list                      the layout as JSON
+dwc reset                     back to the first-run layout
+dwc hide / unhide / toggleVisible   hide or show every widget
+dwc pause / resume            stop / restart every data source
+dwc status                    "editing" or "idle"
+HELP
+        ;;
+    start)
+        if running; then
+            echo "already running"
+            exit 0
+        fi
+        # shellcheck disable=SC2086
+        nohup $QS >/dev/null 2>&1 &
+        echo "started"
+        ;;
+    stop)
+        # shellcheck disable=SC2086
+        exec $QS kill
+        ;;
+    restart)
+        # shellcheck disable=SC2086
+        $QS kill >/dev/null 2>&1
+        sleep 0.5
+        exec "$0" start
+        ;;
+    add)
+        shift
+        # shellcheck disable=SC2086
+        exec $QS ipc call desktopWidgets add "${1:?usage: dwc add TYPE [SIZE]}" "${2:-}"
+        ;;
+    *)
+        cmd=$1
+        shift
+        if ! running; then
+            echo "Desktop Widget Control is not running; start it with:  dwc start" >&2
+            exit 1
+        fi
+        # shellcheck disable=SC2086
+        exec $QS ipc call desktopWidgets "$cmd" "$@"
+        ;;
+esac
