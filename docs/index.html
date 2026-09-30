@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desktop Widget Control — live widgets for your Wayland desktop</title>
+<meta name="description" content="Live widgets for your Wayland desktop, with an editor to place and style them: clocks, system monitors, a music player, weather and more. One Quickshell config, no daemon.">
+<meta property="og:title" content="Desktop Widget Control">
+<meta property="og:description" content="Live widgets for your Wayland desktop, with an editor to place and style them.">
+<meta property="og:image" content="https://lunanoir21.github.io/desktop-widget-control/screenshots/moss/media-pill.webp">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+@font-face { font-family: "Syne"; src: url("fonts/Syne.ttf") format("truetype"); font-weight: 400 800; font-display: swap; }
+@font-face { font-family: "Instrument Sans"; src: url("fonts/InstrumentSans.ttf") format("truetype"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "DM Mono"; src: url("fonts/DMMono-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "DM Mono"; src: url("fonts/DMMono-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+
+/* the colours come from the picked theme (set in the script at the bottom) */
+:root {
+  --card: #11120e; --alt: #1b1d16; --fg: #f3f2ea; --sub: #c4c4b8; --muted: #93948a;
+  --acc: #b7e36a; --onacc: #121d04; --acc2: #e0a458; --track: #26281f;
+  --bg: color-mix(in srgb, var(--card) 88%, #000);
+  --hair: color-mix(in srgb, var(--fg) 12%, transparent);
+  --soft: color-mix(in srgb, var(--fg) 6%, transparent);
+  --display: "Syne", system-ui, sans-serif;
+  --body: "Instrument Sans", system-ui, sans-serif;
+  --mono: "DM Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); transition: background .25s, color .25s; }
+a { color: var(--acc); text-decoration: none; }
+a:hover { text-decoration: underline; }
+img { max-width: 100%; display: block; }
+code, pre, kbd { font-family: var(--mono); }
+.wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+/* two languages in one page: the html element carries the language */
+[data-tr] { display: none; }
+html[lang="tr"] [data-en] { display: none; }
+html[lang="tr"] [data-tr] { display: revert; }
+
+/* ---- nav ---- */
+header { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--hair); }
+.nav { display: flex; align-items: center; gap: 22px; height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 17px; color: var(--fg); letter-spacing: -.01em; }
+.brand img { width: 28px; height: 28px; }
+.brand:hover { text-decoration: none; }
+.nav nav { display: flex; gap: 20px; margin-left: 12px; font-size: 14px; }
+.nav nav a { color: var(--sub); }
+.nav nav a:hover { color: var(--fg); text-decoration: none; }
+.nav .sp { flex: 1; }
+.btn { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 18px; border-radius: 19px; font: 600 14px var(--body); border: 1px solid var(--hair); background: none; color: var(--fg); cursor: pointer; }
+.btn:hover { background: var(--soft); text-decoration: none; }
+.btn.primary { background: var(--acc); color: var(--onacc); border-color: var(--acc); }
+.btn.primary:hover { filter: brightness(1.06); background: var(--acc); }
+.small { height: 32px; padding: 0 12px; font-size: 13px; }
+.pick { position: relative; }
+.pick > button { display: inline-flex; align-items: center; gap: 8px; }
+.sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--hair); position: relative; }
+.sw i { position: absolute; inset: 3px; border-radius: 50%; }
+.pop { position: absolute; right: 0; top: 40px; width: 220px; padding: 8px; border-radius: 14px; background: var(--card); border: 1px solid var(--hair); box-shadow: 0 20px 50px rgba(0,0,0,.35); z-index: 30; }
+.pop[hidden] { display: none; }
+.pop .h { font: 500 10px var(--mono); letter-spacing: .14em; color: var(--muted); padding: 6px 8px; }
+.pop button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 8px; border: 0; background: none; color: var(--fg); font: 14px var(--body); border-radius: 8px; cursor: pointer; text-align: left; }
+.pop button:hover, .pop button[aria-selected="true"] { background: var(--soft); }
+
+/* ---- hero ---- */
+.hero { padding: 72px 0 40px; text-align: center; }
+.hero h1 { font: 800 clamp(38px, 6.4vw, 72px)/1.02 var(--display); letter-spacing: -.03em; margin: 0 auto 18px; max-width: 14ch; }
+.hero h1 em { font-style: normal; color: var(--acc); }
+.hero p.lead { max-width: 640px; margin: 0 auto 28px; color: var(--sub); font-size: 18px; }
+.install { display: inline-flex; align-items: center; gap: 12px; max-width: 100%; padding: 10px 10px 10px 18px; border-radius: 14px; background: var(--card); border: 1px solid var(--hair); font: 14px var(--mono); color: var(--sub); text-align: left; }
+.install code { overflow-x: auto; white-space: nowrap; color: var(--fg); }
+.install .prompt { color: var(--acc); }
+.cta { display: flex; justify-content: center; gap: 12px; margin: 22px 0 6px; flex-wrap: wrap; }
+.note { font-size: 13px; color: var(--muted); }
+.shot { border-radius: 18px; overflow: hidden; border: 1px solid var(--hair); box-shadow: 0 30px 80px rgba(0,0,0,.35); background: var(--card); }
+.hero .shot { margin-top: 46px; }
+.gallery { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); }
+.gallery figure { margin: 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--hair); background: var(--card); }
+.gallery img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 16 / 9; }
+.hero-gallery { margin-top: 46px; text-align: left; }
+@media (max-width: 700px) { .gallery { grid-template-columns: 1fr 1fr; } }
+.shot img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+
+/* ---- sections ---- */
+section { padding: 72px 0; }
+section h2 { font: 700 clamp(28px, 4vw, 42px)/1.1 var(--display); letter-spacing: -.02em; margin: 0 0 12px; }
+section .sub { color: var(--sub); max-width: 680px; margin: 0 0 36px; font-size: 17px; }
+.grid { display: grid; gap: 18px; grid-template-columns: repeat(3, 1fr); }
+.card { padding: 22px; border-radius: 18px; background: var(--card); border: 1px solid var(--hair); }
+.card h3 { font: 700 18px var(--display); margin: 0 0 6px; letter-spacing: -.01em; }
+.card p { margin: 0; color: var(--sub); font-size: 15px; }
+.card .n { font: 500 11px var(--mono); letter-spacing: .14em; color: var(--acc); margin-bottom: 10px; display: block; }
+.split { display: grid; grid-template-columns: 5fr 7fr; gap: 40px; align-items: center; }
+.split.flip { grid-template-columns: 7fr 5fr; }
+.split ul { padding-left: 20px; color: var(--sub); }
+.split li { margin: 6px 0; }
+.mods { display: grid; gap: 12px; grid-template-columns: repeat(4, 1fr); }
+.mod { padding: 14px 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--hair); }
+.mod b { display: block; font: 600 15px var(--display); }
+.mod span { font: 11px var(--mono); color: var(--muted); }
+.mod p { margin: 6px 0 0; font-size: 13px; line-height: 1.45; color: var(--sub); }
+.tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.tabs button[aria-selected="true"] { background: var(--acc); color: var(--onacc); border-color: var(--acc); }
+.panel { padding: 22px; border-radius: 18px; background: var(--card); border: 1px solid var(--hair); }
+.panel[hidden] { display: none; }
+pre { margin: 10px 0 0; padding: 14px 16px; border-radius: 12px; background: var(--alt); overflow-x: auto; font-size: 13px; line-height: 1.6; color: var(--fg); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--hair); }
+th { font: 500 11px var(--mono); letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+td.num { font-family: var(--mono); }
+footer { padding: 48px 0 64px; border-top: 1px solid var(--hair); color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr 1fr; }
+  .mods { grid-template-columns: 1fr 1fr; }
+  .split, .split.flip { grid-template-columns: 1fr; }
+  .nav nav { display: none; }
+}
+@media (max-width: 560px) { .grid, .mods { grid-template-columns: 1fr; } .hero { padding-top: 44px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top"><img src="logo.svg" alt=""><span>Desktop Widget Control</span></a>
+    <nav aria-label="Sections">
+      <a href="#features"><span data-en>Features</span><span data-tr>Özellikler</span></a>
+      <a href="#editor"><span data-en>Editor</span><span data-tr>Düzenleyici</span></a>
+      <a href="#gallery"><span data-en>Gallery</span><span data-tr>Galeri</span></a>
+      <a href="#modules"><span data-en>Modules</span><span data-tr>Modüller</span></a>
+      <a href="#install"><span data-en>Install</span><span data-tr>Kurulum</span></a>
+    </nav>
+    <span class="sp"></span>
+    <div class="pick">
+      <button class="btn small" id="themeBtn" aria-haspopup="listbox" aria-expanded="false"><span class="sw" id="themeSw"></span><span id="themeName">Moss</span></button>
+      <div class="pop" id="themePop" role="listbox" aria-label="Theme" hidden></div>
+    </div>
+    <button class="btn small" id="langBtn" aria-label="Language">TR</button>
+    <a class="btn small" href="https://github.com/lunanoir21/desktop-widget-control">GitHub</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero wrap">
+    <h1><span data-en>Live widgets for your <em>Wayland</em> desktop.</span><span data-tr>Wayland masaüstün için <em>canlı</em> widget'lar.</span></h1>
+    <p class="lead"><span data-en>Clocks, system monitors, a music player, weather and more, placed on your desktop with a real editor. One Quickshell config, no daemon, nothing else to install.</span><span data-tr>Saatler, sistem monitörleri, müzik oynatıcı, hava durumu ve dahası; gerçek bir düzenleyiciyle masaüstüne yerleşir. Tek bir Quickshell yapılandırması, arka plan servisi yok, başka kurulum yok.</span></p>
+    <div class="install"><span class="prompt">$</span><code id="cmd">curl -fsSL https://raw.githubusercontent.com/lunanoir21/desktop-widget-control/main/install.sh | sh</code><button class="btn small" id="copy"><span data-en>Copy</span><span data-tr>Kopyala</span></button></div>
+    <div class="cta">
+      <a class="btn primary" href="#install"><span data-en>Install</span><span data-tr>Kur</span></a>
+      <a class="btn" href="https://github.com/lunanoir21/desktop-widget-control"><span data-en>View on GitHub</span><span data-tr>GitHub'da gör</span></a>
+    </div>
+    <div class="note"><span data-en>Hyprland, Sway, niri, river and other wlroots-style compositors · Quickshell 0.3+</span><span data-tr>Hyprland, Sway, niri, river ve diğer wlroots tarzı compositor'lar · Quickshell 0.3+</span></div>
+    <div class="gallery hero-gallery"><figure><img data-shot="media-pill" src="screenshots/moss/media-pill.webp" alt="The pill music player" loading="lazy"></figure><figure><img data-shot="clock-led-ring" src="screenshots/moss/clock-led-ring.webp" alt="The LED ring clock" loading="lazy"></figure><figure><img data-shot="weather" src="screenshots/moss/weather.webp" alt="The weather widget for Istanbul" loading="lazy"></figure><figure><img data-shot="clock-poster-cut" src="screenshots/moss/clock-poster-cut.webp" alt="The poster clock, cut style" loading="lazy"></figure><figure><img data-shot="media-scope" src="screenshots/moss/media-scope.webp" alt="The oscilloscope music player" loading="lazy"></figure><figure><img data-shot="cpu-graph" src="screenshots/moss/cpu-graph.webp" alt="The CPU graph" loading="lazy"></figure></div>
+  </div>
+
+  <section id="features"><div class="wrap">
+    <h2><span data-en>Everything a desktop widget should be</span><span data-tr>Bir masaüstü widget'ının olması gereken her şey</span></h2>
+    <p class="sub"><span data-en>Small, cheap to run, and yours to rearrange.</span><span data-tr>Küçük, çalıştırması ucuz ve düzenini değiştirmesi senin elinde.</span></p>
+    <div class="grid">
+      <div class="card"><span class="n">01</span><h3><span data-en>16 modules</span><span data-tr>16 modül</span></h3><p><span data-en>Six clocks, five system monitors, a music player, calendar, weather, pomodoro and notes. Most come in several sizes.</span><span data-tr>Altı saat, beş sistem monitörü, müzik oynatıcı, takvim, hava durumu, pomodoro ve notlar. Çoğu birkaç boyutta.</span></p></div>
+      <div class="card"><span class="n">02</span><h3><span data-en>A real editor</span><span data-tr>Gerçek bir düzenleyici</span></h3><p><span data-en>A library with live thumbnails, drag and drop onto a snapping grid, resize by preset, and an inspector built from each module's options.</span><span data-tr>Canlı önizlemeli kütüphane, ızgaraya yapışan sürükle-bırak, hazır boyutlarla yeniden boyutlandırma ve her modülün seçeneklerinden üretilen panel.</span></p></div>
+      <div class="card"><span class="n">03</span><h3><span data-en>Styles</span><span data-tr>Stiller</span></h3><p><span data-en>One option swaps the whole look: a dotted ring clock, btop-style graphs, a pill or oscilloscope music player, a lock-screen poster.</span><span data-tr>Tek bir seçenek bütün görünümü değiştirir: noktalı halka saat, btop tarzı grafikler, hap ya da osiloskop müzik oynatıcı, kilit ekranı posteri.</span></p></div>
+      <div class="card"><span class="n">04</span><h3><span data-en>Nine themes</span><span data-tr>Dokuz tema</span></h3><p><span data-en>Try them up there: this page follows the theme you pick, screenshots included. The tests keep text readable in every one.</span><span data-tr>Yukarıda dene: bu sayfa seçtiğin temayı izler, ekran görüntüleri dahil. Testler her temada yazının okunaklı kalmasını denetler.</span></p></div>
+      <div class="card"><span class="n">05</span><h3><span data-en>Cheap to run</span><span data-tr>Çalıştırması ucuz</span></h3><p><span data-en>Data sources run only while a widget needs them and are shared. About 0.5% of one core with all sixteen on screen.</span><span data-tr>Veri kaynakları yalnızca bir widget gerektiğinde çalışır ve paylaşılır. On altısı ekrandayken tek çekirdeğin yaklaşık %0,5'i.</span></p></div>
+      <div class="card"><span class="n">06</span><h3><span data-en>Scriptable, independent</span><span data-tr>Betiklenebilir, bağımsız</span></h3><p><span data-en>Everything the editor does is an IPC call, the layout is one JSON file, and the fonts are bundled. It needs nothing from the rest of your shell.</span><span data-tr>Düzenleyicinin yaptığı her şey bir IPC çağrısı, düzen tek bir JSON dosyası, fontlar pakette. Shell'inin geri kalanından hiçbir şey istemez.</span></p></div>
+    </div>
+  </div></section>
+
+  <section id="editor"><div class="wrap split">
+    <div>
+      <h2><span data-en>Press a key, edit the desktop</span><span data-tr>Bir tuşa bas, masaüstünü düzenle</span></h2>
+      <ul>
+        <li><span data-en>Drag a card from the library onto the desktop, or double-click it.</span><span data-tr>Kütüphaneden bir kartı masaüstüne sürükle ya da çift tıkla.</span></li>
+        <li><span data-en>Widgets snap to cells and never land on top of each other.</span><span data-tr>Widget'lar hücrelere yapışır, üst üste binmez.</span></li>
+        <li><span data-en>The panels slide out of the way while you drag, and the inspector opens on the side away from the widget you are editing.</span><span data-tr>Sürüklerken paneller yoldan çekilir; özellik paneli düzenlediğin widget'ın karşı tarafında açılır.</span></li>
+        <li><span data-en>Centre a widget on the screen with one button.</span><span data-tr>Tek düğmeyle bir widget'ı ekranın ortasına al.</span></li>
+      </ul>
+    </div>
+    <div class="shot"><img data-shot="editor" src="screenshots/moss/editor.webp" alt="The editor: the widget library on the left, the desktop with a grid in the middle, the inspector on the right" loading="lazy"></div>
+  </div></section>
+
+  <section id="tour"><div class="wrap split flip">
+    <div class="shot"><img data-shot="tour" src="screenshots/moss/tour.webp" alt="The first-run tour" loading="lazy"></div>
+    <div>
+      <h2><span data-en>A short first-run tour</span><span data-tr>Kısa bir ilk kurulum turu</span></h2>
+      <p class="sub" style="margin:0"><span data-en>The first time it starts, a six-step tour shows how to open the editor, fill the desktop, change a widget and pick a theme. Skip it any time; <code>dwc tour</code> brings it back.</span><span data-tr>İlk açılışta altı adımlık bir tur düzenleyiciyi nasıl açacağını, masaüstünü nasıl dolduracağını, bir widget'ı nasıl değiştireceğini ve tema seçmeyi gösterir. İstediğin zaman atla; <code>dwc tour</code> geri getirir.</span></p>
+    </div>
+  </div></section>
+
+  <section id="gallery"><div class="wrap">
+    <h2><span data-en>Every module, every style</span><span data-tr>Her modül, her stil</span></h2>
+    <p class="sub"><span data-en>Shots of the real thing, one widget at a time. Change the theme at the top and they follow.</span><span data-tr>Gerçeğinden görüntüler, her seferinde tek widget. Üstten temayı değiştir, görüntüler de değişir.</span></p>
+    <div class="gallery"><figure><img data-shot="media-S" src="screenshots/moss/media-S.webp" alt="media S" loading="lazy"></figure><figure><img data-shot="media-M" src="screenshots/moss/media-M.webp" alt="media M" loading="lazy"></figure><figure><img data-shot="media-L" src="screenshots/moss/media-L.webp" alt="media L" loading="lazy"></figure><figure><img data-shot="media-wide" src="screenshots/moss/media-wide.webp" alt="media wide" loading="lazy"></figure><figure><img data-shot="media-wide-x" src="screenshots/moss/media-wide-x.webp" alt="media wide x" loading="lazy"></figure><figure><img data-shot="clock-led-classic" src="screenshots/moss/clock-led-classic.webp" alt="clock led classic" loading="lazy"></figure><figure><img data-shot="clock-led-strip" src="screenshots/moss/clock-led-strip.webp" alt="clock led strip" loading="lazy"></figure><figure><img data-shot="clock-analog" src="screenshots/moss/clock-analog.webp" alt="clock analog" loading="lazy"></figure><figure><img data-shot="clock-serif" src="screenshots/moss/clock-serif.webp" alt="clock serif" loading="lazy"></figure><figure><img data-shot="clock-poster-classic" src="screenshots/moss/clock-poster-classic.webp" alt="clock poster classic" loading="lazy"></figure><figure><img data-shot="clock-poster-sign" src="screenshots/moss/clock-poster-sign.webp" alt="clock poster sign" loading="lazy"></figure><figure><img data-shot="clock-mono" src="screenshots/moss/clock-mono.webp" alt="clock mono" loading="lazy"></figure><figure><img data-shot="clock-world" src="screenshots/moss/clock-world.webp" alt="clock world" loading="lazy"></figure><figure><img data-shot="ram-ring" src="screenshots/moss/ram-ring.webp" alt="ram ring" loading="lazy"></figure><figure><img data-shot="disk" src="screenshots/moss/disk.webp" alt="disk" loading="lazy"></figure><figure><img data-shot="net" src="screenshots/moss/net.webp" alt="net" loading="lazy"></figure><figure><img data-shot="temp-gauge" src="screenshots/moss/temp-gauge.webp" alt="temp gauge" loading="lazy"></figure><figure><img data-shot="calendar" src="screenshots/moss/calendar.webp" alt="calendar" loading="lazy"></figure><figure><img data-shot="pomodoro" src="screenshots/moss/pomodoro.webp" alt="pomodoro" loading="lazy"></figure><figure><img data-shot="notes" src="screenshots/moss/notes.webp" alt="notes" loading="lazy"></figure></div>
+  </div></section>
+
+  <section id="modules"><div class="wrap">
+    <h2><span data-en>Sixteen modules</span><span data-tr>On altı modül</span></h2>
+    <p class="sub"><span data-en>Sizes are grid presets: S 4×4 cells, M 8×4, L 8×8, W 12×4, X 20×4.</span><span data-tr>Boyutlar ızgara hazırlarıdır: S 4×4 hücre, M 8×4, L 8×8, W 12×4, X 20×4.</span></p>
+    <div class="mods">
+      <div class="mod"><b>LED pixel</b><span>M L W</span><p><span data-en>Dot-matrix clock: classic, a ring that fills with the seconds, or a day strip.</span><span data-tr>Nokta-matris saat: klasik, saniyeyle dolan halka ya da gün şeridi.</span></p></div>
+      <div class="mod"><b>Analog</b><span>S M L</span><p><span data-en>Vector face, optional second hand, date beside it.</span><span data-tr>Vektör kadran, isteğe bağlı saniye ibresi, yanında tarih.</span></p></div>
+      <div class="mod"><b>Serif</b><span>M L W</span><p><span data-en>A large italic time, once a minute.</span><span data-tr>Büyük italik saat, dakikada bir.</span></p></div>
+      <div class="mod"><b>Poster</b><span>M L W</span><p><span data-en>Lock-screen look: classic, cut letters, or an outlined sign.</span><span data-tr>Kilit ekranı görünümü: klasik, kesik harfler ya da çizgili afiş.</span></p></div>
+      <div class="mod"><b>Mono + seconds</b><span>S M</span><p><span data-en>Time, a seconds bar, date and week number.</span><span data-tr>Saat, saniye çubuğu, tarih ve hafta numarası.</span></p></div>
+      <div class="mod"><b>World clock</b><span>M L</span><p><span data-en>Up to four time zones with their offsets.</span><span data-tr>En çok dört saat dilimi ve farkları.</span></p></div>
+      <div class="mod"><b>CPU graph</b><span>S M L</span><p><span data-en>btop-style bars coloured by load, or a line.</span><span data-tr>Yüke göre renkli btop tarzı çubuklar ya da çizgi.</span></p></div>
+      <div class="mod"><b>RAM ring</b><span>S M</span><p><span data-en>Memory as a ring, swap beside it.</span><span data-tr>Bellek halka olarak, yanında swap.</span></p></div>
+      <div class="mod"><b>Disk</b><span>S M</span><p><span data-en>A bar per mount point, warns when full.</span><span data-tr>Bağlama noktası başına çubuk, dolunca uyarır.</span></p></div>
+      <div class="mod"><b>Network</b><span>S M W</span><p><span data-en>Download above, upload below a centre line.</span><span data-tr>Orta çizginin üstünde indirme, altında yükleme.</span></p></div>
+      <div class="mod"><b>Temperature</b><span>S M</span><p><span data-en>A half-circle gauge for the CPU sensor.</span><span data-tr>CPU sensörü için yarım daire gösterge.</span></p></div>
+      <div class="mod"><b>Media player</b><span>S M L W X</span><p><span data-en>Any MPRIS player, with a live cava spectrum in the progress bar; card, wide strip, pill or oscilloscope.</span><span data-tr>Herhangi bir MPRIS oynatıcı, ilerleme çubuğunda canlı cava spektrumu; kart, geniş şerit, hap ya da osiloskop.</span></p></div>
+      <div class="mod"><b>Calendar</b><span>M L</span><p><span data-en>A month grid, today's date beside it.</span><span data-tr>Ay ızgarası, yanında bugünün tarihi.</span></p></div>
+      <div class="mod"><b>Weather</b><span>S M L</span><p><span data-en>Open-Meteo forecast; pick a country and a city.</span><span data-tr>Open-Meteo tahmini; ülke ve şehir seç.</span></p></div>
+      <div class="mod"><b>Pomodoro</b><span>S M</span><p><span data-en>Focus and break timer; click the ring.</span><span data-tr>Odak ve mola sayacı; halkaya tıkla.</span></p></div>
+      <div class="mod"><b>Notes</b><span>M L</span><p><span data-en>A checklist you can tick on the desktop.</span><span data-tr>Masaüstünde işaretleyebileceğin liste.</span></p></div>
+    </div>
+  </div></section>
+
+  <section id="cost"><div class="wrap">
+    <h2><span data-en>What it costs</span><span data-tr>Maliyeti</span></h2>
+    <p class="sub"><span data-en>Measured with <code>tools/measure.py</code> on one 1080p laptop, 20 seconds after start. The process alone, not the compositor or the GPU.</span><span data-tr>Tek bir 1080p dizüstünde <code>tools/measure.py</code> ile, başladıktan 20 saniye sonra ölçüldü. Yalnızca süreç; compositor ya da GPU dahil değil.</span></p>
+    <div class="panel"><table>
+      <tr><th><span data-en>Scenario</span><span data-tr>Senaryo</span></th><th>CPU</th><th>RSS</th></tr>
+      <tr><td><span data-en>first-run layout, 5 widgets</span><span data-tr>ilk açılış düzeni, 5 widget</span></td><td class="num">0.2 %</td><td class="num">254 MB</td></tr>
+      <tr><td><span data-en>all modules at once</span><span data-tr>tüm modüller aynı anda</span></td><td class="num">0.5 %</td><td class="num">263 MB</td></tr>
+    </table></div>
+  </div></section>
+
+  <section id="install"><div class="wrap">
+    <h2><span data-en>Install</span><span data-tr>Kurulum</span></h2>
+    <p class="sub"><span data-en>Pick whichever suits you. The one-liner links it in, adds an app-menu entry and, if you agree, the Hyprland autostart and a key.</span><span data-tr>Sana uygun olanı seç. Tek satır onu yerleştirir, uygulama menüsüne giriş ekler ve istersen Hyprland otomatik başlatmasını ve bir tuşu ekler.</span></p>
+    <div class="tabs" role="tablist">
+      <button class="btn small" role="tab" aria-selected="true" data-tab="one"><span data-en>One line</span><span data-tr>Tek satır</span></button>
+      <button class="btn small" role="tab" aria-selected="false" data-tab="omarchy">Omarchy</button>
+      <button class="btn small" role="tab" aria-selected="false" data-tab="arch">Arch (PKGBUILD)</button>
+      <button class="btn small" role="tab" aria-selected="false" data-tab="manual"><span data-en>By hand</span><span data-tr>Elle</span></button>
+    </div>
+    <div class="panel" data-panel="one"><pre>curl -fsSL https://raw.githubusercontent.com/lunanoir21/desktop-widget-control/main/install.sh | sh</pre>
+      <p class="note" style="margin:12px 0 0"><span data-en>Needs Quickshell. Run it again any time to update; <code>install.sh --uninstall</code> removes everything it added (your layout stays).</span><span data-tr>Quickshell gerekir. Güncellemek için istediğin zaman yeniden çalıştır; <code>install.sh --uninstall</code> eklediği her şeyi kaldırır (düzenin kalır).</span></p></div>
+    <div class="panel" data-panel="omarchy" hidden><pre>omarchy plugin add https://github.com/lunanoir21/desktop-widget-control-omarchy.git --enable</pre>
+      <p class="note" style="margin:12px 0 0"><span data-en>The Omarchy package is a thin wrapper around this project, like my other plugins.</span><span data-tr>Omarchy paketi bu projenin ince bir sarmalayıcısıdır, diğer eklentilerim gibi.</span></p></div>
+    <div class="panel" data-panel="arch" hidden><pre>git clone https://github.com/lunanoir21/desktop-widget-control
+cd desktop-widget-control/packaging &amp;&amp; makepkg -si</pre></div>
+    <div class="panel" data-panel="manual" hidden><pre>git clone https://github.com/lunanoir21/desktop-widget-control
+cd desktop-widget-control
+quickshell -p .            # try it, nothing is installed
+./install.sh               # or install it for your user</pre></div>
+
+    <h2 style="margin-top:56px"><span data-en>Scriptable</span><span data-tr>Betiklenebilir</span></h2>
+    <div class="panel"><pre>dwc toggle                       # open / close the editor (bind this to a key)
+dwc add media X                  # an extra-wide music player
+dwc set media-1 look '"pill"'    # change its style
+dwc center media-1               # put it in the middle of the screen
+dwc theme cycle                  # next theme
+dwc list                         # the layout as JSON</pre></div>
+  </div></section>
+</main>
+
+<footer><div class="wrap">
+  <div>Desktop Widget Control · MIT · <span data-en>made by</span><span data-tr>yapan</span> <a href="https://github.com/lunanoir21">lunanoir21</a></div>
+  <div><a href="https://github.com/lunanoir21/desktop-widget-control">GitHub</a> · <a href="https://github.com/lunanoir21/desktop-widget-control/blob/main/CHANGELOG.md">Changelog</a> · <a href="https://github.com/lunanoir21/desktop-widget-control/blob/main/docs/architecture.md">Architecture</a> · <a href="https://github.com/lunanoir21/desktop-widget-control/blob/main/docs/writing-a-widget.md"><span data-en>Write a widget</span><span data-tr>Widget yaz</span></a></div>
+</div></footer>
+
+<script>
+(function () {
+  // the same nine as ui/js/Themes.js (tests/check_site.py keeps them in step)
+  var THEMES = [
+    { id: 'moss', name: 'Moss', dark: true, card: '#11120e', alt: '#1b1d16', fg: '#f3f2ea', sub: '#c4c4b8', muted: '#93948a', acc: '#b7e36a', onAcc: '#121d04', acc2: '#e0a458', track: '#26281f' },
+    { id: 'umbra', name: 'Umbra', dark: true, card: '#070707', alt: '#171717', fg: '#f5f2ec', sub: '#c1bdb5', muted: '#918d86', acc: '#eeeae2', onAcc: '#050505', acc2: '#a39e94', track: '#242424' },
+    { id: 'black', name: 'Black', dark: true, card: '#15161a', alt: '#22242a', fg: '#fafafa', sub: '#c6c8cd', muted: '#9498a2', acc: '#f2f3f5', onAcc: '#0b0c0f', acc2: '#9aa0ab', track: '#303239' },
+    { id: 'graphite', name: 'Graphite', dark: true, card: '#44474f', alt: '#52555e', fg: '#ffffff', sub: '#d4d6dc', muted: '#adb0b9', acc: '#f4f5f7', onAcc: '#24262b', acc2: '#c9ccd3', track: '#5d606a' },
+    { id: 'paper', name: 'Paper', dark: false, card: '#ffffff', alt: '#ebedf0', fg: '#111318', sub: '#3f434b', muted: '#676c76', acc: '#181a1f', onAcc: '#ffffff', acc2: '#6b7280', track: '#dfe2e6' },
+    { id: 'sand', name: 'Sand', dark: false, card: '#f8f1e7', alt: '#ebdfce', fg: '#2f2620', sub: '#544537', muted: '#7b6a58', acc: '#5c4433', onAcc: '#f8f1e7', acc2: '#a0856a', track: '#e2d4bf' },
+    { id: 'gold', name: 'Gold', dark: true, card: '#120d08', alt: '#221a10', fg: '#f8ecd8', sub: '#cdb896', muted: '#96836a', acc: '#f0b93c', onAcc: '#241a08', acc2: '#c9b48a', track: '#2d2215' },
+    { id: 'amber', name: 'Amber', dark: true, card: '#141110', alt: '#241c15', fg: '#f7ede0', sub: '#cdbba5', muted: '#978672', acc: '#ff9f1c', onAcc: '#241202', acc2: '#a9c2b2', track: '#2f251b' },
+    { id: 'crimson', name: 'Crimson', dark: true, card: '#130a0b', alt: '#241214', fg: '#f8e9ea', sub: '#d0b3b6', muted: '#9c7c7f', acc: '#e5484d', onAcc: '#2a0a0c', acc2: '#e0a458', track: '#321a1d' }
+  ];
+  var root = document.documentElement;
+  var current = 'moss';
+
+  function byId(id) { for (var i = 0; i < THEMES.length; i++) if (THEMES[i].id === id) return THEMES[i]; return THEMES[0]; }
+  function swatch(t) { return '<span class="sw" style="background:' + t.card + '"><i style="background:' + t.acc + '"></i></span>'; }
+
+  function paint(t, keep) {
+    current = t.id;
+    var map = { card: t.card, alt: t.alt, fg: t.fg, sub: t.sub, muted: t.muted, acc: t.acc, onacc: t.onAcc, acc2: t.acc2, track: t.track };
+    for (var k in map) root.style.setProperty('--' + k, map[k]);
+    root.style.colorScheme = t.dark ? 'dark' : 'light';
+    // the screenshots follow the theme
+    var shots = document.querySelectorAll('img[data-shot]');
+    for (var i = 0; i < shots.length; i++) shots[i].src = 'screenshots/' + t.id + '/' + shots[i].getAttribute('data-shot') + '.webp';
+    document.getElementById('themeSw').outerHTML = swatch(t).replace('class="sw"', 'class="sw" id="themeSw"');
+    document.getElementById('themeName').textContent = t.name;
+    var opts = pop.querySelectorAll('button');
+    for (var j = 0; j < opts.length; j++) opts[j].setAttribute('aria-selected', opts[j].getAttribute('data-id') === t.id ? 'true' : 'false');
+    if (!keep) { try { localStorage.setItem('dwc-theme', t.id); } catch (e) {} }
+  }
+
+  var pop = document.getElementById('themePop'), btn = document.getElementById('themeBtn');
+  pop.innerHTML = '<div class="h">THEMES</div>' + THEMES.map(function (t) {
+    return '<button role="option" data-id="' + t.id + '">' + swatch(t) + '<span>' + t.name + '</span></button>';
+  }).join('');
+  function open(v) { pop.hidden = !v; btn.setAttribute('aria-expanded', v ? 'true' : 'false'); }
+  btn.addEventListener('click', function () { open(pop.hidden); });
+  pop.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { paint(byId(b.getAttribute('data-id'))); open(false); } });
+  document.addEventListener('click', function (e) { if (!pop.hidden && !e.target.closest('.pick')) open(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') open(false); });
+
+  var start = 'moss';
+  try { start = localStorage.getItem('dwc-theme') || start; } catch (e) {}
+  var q = /[?&]theme=(\w+)/.exec(location.search); if (q) start = q[1];
+  paint(byId(start), true);
+
+  // language
+  var lang = 'en';
+  try { lang = localStorage.getItem('dwc-lang') || ((navigator.language || '').indexOf('tr') === 0 ? 'tr' : 'en'); } catch (e) {}
+  function setLang(l) {
+    lang = l; root.lang = l;
+    document.getElementById('langBtn').textContent = l === 'tr' ? 'EN' : 'TR';
+    try { localStorage.setItem('dwc-lang', l); } catch (e) {}
+  }
+  document.getElementById('langBtn').addEventListener('click', function () { setLang(lang === 'tr' ? 'en' : 'tr'); });
+  setLang(lang);
+
+  // copy the install line
+  document.getElementById('copy').addEventListener('click', function () {
+    var b = this;
+    navigator.clipboard.writeText(document.getElementById('cmd').textContent).then(function () {
+      var old = b.innerHTML; b.textContent = '✓'; setTimeout(function () { b.innerHTML = old; }, 1400);
+    });
+  });
+
+  // install tabs
+  var tabs = document.querySelectorAll('[data-tab]'), panels = document.querySelectorAll('[data-panel]');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.setAttribute('aria-selected', x === t ? 'true' : 'false'); });
+      panels.forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== t.getAttribute('data-tab'); });
+    });
+  });
+})();
+</script>
+</body>
+</html>
