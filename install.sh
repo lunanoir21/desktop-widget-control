@@ -170,7 +170,9 @@ run ln -sf "$SRC/bin/dwc" "$BIN_DIR/dwc"
 say "helper:  $BIN_DIR/dwc"
 run cp "$SRC/packaging/desktop-widget-control.desktop" "$DATA_HOME/applications/desktop-widget-control.desktop"
 run cp "$SRC/assets/icon.svg" "$DATA_HOME/icons/hicolor/scalable/apps/desktop-widget-control.svg"
-command -v update-desktop-database >/dev/null 2>&1 && run update-desktop-database "$DATA_HOME/applications" 2>/dev/null || true
+if command -v update-desktop-database >/dev/null 2>&1; then
+    run update-desktop-database "$DATA_HOME/applications" 2>/dev/null || true
+fi
 say "launcher: Desktop Widget Control (in your app menu)"
 case ":$PATH:" in
     *":$BIN_DIR:"*) ;;
