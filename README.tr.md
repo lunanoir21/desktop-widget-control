@@ -74,10 +74,10 @@ Hyprland:
 
 ```conf
 exec-once = quickshell -c desktop-widget-control
-bind = SUPER, W, exec, dwc toggle
+bind = SUPER, G, exec, dwc toggle
 ```
 
-Sway: `exec quickshell -c desktop-widget-control` ve `bindsym $mod+w exec dwc toggle`. Diğer compositor'larda aynı iki satır kendi söz diziminde.
+Sway: `exec quickshell -c desktop-widget-control` ve `bindsym $mod+g exec dwc toggle`. Diğer compositor'larda aynı iki satır kendi söz diziminde.
 
 Zaten kendi Quickshell shell'ini çalıştırıyorsan ikinci bir süreç gerekmez: `ui` klasörünü içe aktar ve köküne bir `DwcHost {}` ekle ([Kendi shell'inin içinde](#kendi-shellinin-içinde)).
 

@@ -141,11 +141,12 @@ PanelWindow {
                     onPicked: v => DwcStore.setLanguage(v)
                 }
                 // the two lines that open the editor from a key
+                DwcKeyBind { id: keyBind; visible: root.step === 1 && keyBind.hyprland }
                 Column {
-                    visible: root.step === 1
+                    visible: root.step === 1 && !keyBind.hyprland
                     spacing: 6
                     Repeater {
-                        model: ["bind = SUPER, W, exec, dwc toggle   # Hyprland", "bindsym $mod+w exec dwc toggle   # Sway"]
+                        model: ["bind = SUPER, G, exec, dwc toggle   # Hyprland", "bindsym $mod+g exec dwc toggle   # Sway"]
                         delegate: Rectangle {
                             required property string modelData
                             height: 28; width: line.implicitWidth + 24; radius: 8; color: DwcTheme.alt; border.width: 1; border.color: DwcTheme.line

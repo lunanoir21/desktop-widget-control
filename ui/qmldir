@@ -18,3 +18,4 @@ DwcLibCard 1.0 DwcLibCard.qml
 DwcHandle 1.0 DwcHandle.qml
 DwcOnboarding 1.0 DwcOnboarding.qml
 DwcTourArt 1.0 DwcTourArt.qml
+DwcKeyBind 1.0 DwcKeyBind.qml

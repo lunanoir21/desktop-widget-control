@@ -28,5 +28,5 @@ else
     "$RUNNER" -input . -platform offscreen
 fi
 
-python3 -m unittest -v test_files test_install
+python3 -m unittest -v test_files test_install test_keybind
 python3 check_site.py

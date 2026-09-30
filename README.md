@@ -78,10 +78,10 @@ Hyprland:
 
 ```conf
 exec-once = quickshell -c desktop-widget-control
-bind = SUPER, W, exec, dwc toggle
+bind = SUPER, G, exec, dwc toggle
 ```
 
-Sway: `exec quickshell -c desktop-widget-control` and `bindsym $mod+w exec dwc toggle`. Other compositors are the same two lines in their own syntax.
+Sway: `exec quickshell -c desktop-widget-control` and `bindsym $mod+g exec dwc toggle`. Other compositors are the same two lines in their own syntax.
 
 If you already run a Quickshell shell of your own, you do not need a second process: import the `ui` folder and add one `DwcHost {}` to your root (see [Use it inside your own shell](#use-it-inside-your-own-shell)).
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 — 2026-10-01
+
+- The first-run tour offers to add the editor key on Hyprland (`SUPER + G`, or `SUPER SHIFT + G` / `SUPER ALT + G` when that one is taken): one button, nothing is touched until it is pressed. It goes through a small snippet file sourced from `bindings.conf` (Omarchy) or `hyprland.conf`; a Lua config gets the line to paste instead. This is the prompt for installs that have no installer to ask, such as the Omarchy plugin.
+- The site's screenshots swap instantly (they are fetched ahead), and the logo and favicon take the theme's colours.
+
 ## 0.1.0 — 2026-09-30
 
 First version.

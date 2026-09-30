@@ -91,7 +91,7 @@ Rectangle {
             x: 56; anchors.verticalCenter: parent.verticalCenter
             spacing: 10
             Repeater {
-                model: ["SUPER", "W"]
+                model: ["SUPER", "G"]
                 delegate: Rectangle {
                     required property string modelData
                     width: modelData.length > 1 ? 86 : 54; height: 54; radius: 10
