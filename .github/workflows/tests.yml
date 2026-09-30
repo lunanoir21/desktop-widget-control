@@ -40,6 +40,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/bin"
           printf '#!/bin/sh\nexit 1\n' > "$RUNNER_TEMP/bin/quickshell"
           chmod +x "$RUNNER_TEMP/bin/quickshell"
+          unset XDG_CONFIG_HOME XDG_DATA_HOME XDG_BIN_HOME
           export HOME="$RUNNER_TEMP/home"
           mkdir -p "$HOME"
           PATH="$RUNNER_TEMP/bin:$PATH" sh install.sh --no-start --no-autostart
