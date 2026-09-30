@@ -8,7 +8,7 @@
 <meta property="og:title" content="Desktop Widget Control">
 <meta property="og:description" content="Live widgets for your Wayland desktop, with an editor to place and style them.">
 <meta property="og:image" content="https://lunanoir21.github.io/desktop-widget-control/screenshots/moss/media-pill.webp">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" id="favicon" href="icon.svg" type="image/svg+xml">
 <style>
 @font-face { font-family: "Syne"; src: url("fonts/Syne.ttf") format("truetype"); font-weight: 400 800; font-display: swap; }
 @font-face { font-family: "Instrument Sans"; src: url("fonts/InstrumentSans.ttf") format("truetype"); font-weight: 400 700; font-display: swap; }
@@ -28,7 +28,7 @@
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); transition: background .25s, color .25s; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); transition: background .12s, color .12s; }
 a { color: var(--acc); text-decoration: none; }
 a:hover { text-decoration: underline; }
 img { max-width: 100%; display: block; }
@@ -44,7 +44,7 @@ html[lang="tr"] [data-tr] { display: revert; }
 header { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--hair); }
 .nav { display: flex; align-items: center; gap: 22px; height: 60px; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 17px; color: var(--fg); letter-spacing: -.01em; }
-.brand img { width: 28px; height: 28px; }
+.brand .mark { width: 28px; height: 28px; }
 .brand:hover { text-decoration: none; }
 .nav nav { display: flex; gap: 20px; margin-left: 12px; font-size: 14px; }
 .nav nav a { color: var(--sub); }
@@ -126,7 +126,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
 <body>
 <header>
   <div class="wrap nav">
-    <a class="brand" href="#top"><img src="logo.svg" alt=""><span>Desktop Widget Control</span></a>
+    <a class="brand" href="#top"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="34" height="34" rx="9" fill="var(--acc)"/><rect x="42" y="4" width="18" height="18" rx="6" fill="var(--fg)"/><rect x="42" y="26" width="18" height="12" rx="5" fill="var(--acc2)"/><rect x="5.5" y="43.5" width="53" height="15" rx="6" fill="none" stroke="var(--fg)" stroke-width="3"/><rect x="11" y="49" width="20" height="4" rx="2" fill="var(--fg)"/></svg><span>Desktop Widget Control</span></a>
     <nav aria-label="Sections">
       <a href="#features"><span data-en>Features</span><span data-tr>Özellikler</span></a>
       <a href="#editor"><span data-en>Editor</span><span data-tr>Düzenleyici</span></a>
@@ -285,14 +285,43 @@ dwc list                         # the layout as JSON</pre></div>
   function byId(id) { for (var i = 0; i < THEMES.length; i++) if (THEMES[i].id === id) return THEMES[i]; return THEMES[0]; }
   function swatch(t) { return '<span class="sw" style="background:' + t.card + '"><i style="background:' + t.acc + '"></i></span>'; }
 
+  // Screenshots swap instantly: each one is fetched ahead of time (the picked
+  // theme first, then the rest when the browser is idle) and only switched once
+  // it is decoded, so the old one stays up rather than flashing empty.
+  var cache = {};
+  function url(theme, name) { return 'screenshots/' + theme + '/' + name + '.webp'; }
+  function ready(theme, name, done) {
+    var u = url(theme, name), im = cache[u];
+    if (!im) { im = cache[u] = new Image(); im.src = u; }
+    if (im.complete) return done();
+    im.addEventListener('load', done, { once: true });
+  }
+  function names() { return Array.prototype.map.call(document.querySelectorAll('img[data-shot]'), function (i) { return i.getAttribute('data-shot'); }); }
+  function swapShots(id) {
+    Array.prototype.forEach.call(document.querySelectorAll('img[data-shot]'), function (img) {
+      var n = img.getAttribute('data-shot');
+      ready(id, n, function () { if (current === id) img.src = url(id, n); });
+    });
+  }
+  function preloadAll() {
+    var list = [];
+    THEMES.forEach(function (t) { names().forEach(function (n) { list.push([t.id, n]); }); });
+    (function next() {
+      var it = list.shift(); if (!it) return;
+      ready(it[0], it[1], function () { setTimeout(next, 0); });
+    })();
+  }
+  window.addEventListener('load', function () { (window.requestIdleCallback || setTimeout)(preloadAll, 300); });
+
   function paint(t, keep) {
     current = t.id;
     var map = { card: t.card, alt: t.alt, fg: t.fg, sub: t.sub, muted: t.muted, acc: t.acc, onacc: t.onAcc, acc2: t.acc2, track: t.track };
     for (var k in map) root.style.setProperty('--' + k, map[k]);
     root.style.colorScheme = t.dark ? 'dark' : 'light';
     // the screenshots follow the theme
-    var shots = document.querySelectorAll('img[data-shot]');
-    for (var i = 0; i < shots.length; i++) shots[i].src = 'screenshots/' + t.id + '/' + shots[i].getAttribute('data-shot') + '.webp';
+    swapShots(t.id);
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="' + t.card + '"/><g transform="translate(24 24) scale(1.25)"><rect x="4" y="4" width="34" height="34" rx="9" fill="' + t.acc + '"/><rect x="42" y="4" width="18" height="18" rx="6" fill="' + t.fg + '"/><rect x="42" y="26" width="18" height="12" rx="5" fill="' + t.acc2 + '"/><rect x="5.5" y="43.5" width="53" height="15" rx="6" fill="none" stroke="' + t.fg + '" stroke-width="3"/><rect x="11" y="49" width="20" height="4" rx="2" fill="' + t.fg + '"/></g></svg>';
+    document.getElementById('favicon').href = 'data:image/svg+xml,' + encodeURIComponent(svg);
     document.getElementById('themeSw').outerHTML = swatch(t).replace('class="sw"', 'class="sw" id="themeSw"');
     document.getElementById('themeName').textContent = t.name;
     var opts = pop.querySelectorAll('button');
@@ -306,6 +335,7 @@ dwc list                         # the layout as JSON</pre></div>
   }).join('');
   function open(v) { pop.hidden = !v; btn.setAttribute('aria-expanded', v ? 'true' : 'false'); }
   btn.addEventListener('click', function () { open(pop.hidden); });
+  pop.addEventListener('pointerover', function (e) { var b = e.target.closest('button'); if (b) names().forEach(function (n) { ready(b.getAttribute('data-id'), n, function () {}); }); });
   pop.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { paint(byId(b.getAttribute('data-id'))); open(false); } });
   document.addEventListener('click', function (e) { if (!pop.hidden && !e.target.closest('.pick')) open(false); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') open(false); });
