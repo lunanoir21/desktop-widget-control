@@ -1,0 +1,58 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  qml-and-files:
+    name: QML tests and file checks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install the Qt 6 test tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            qt6-declarative-dev-tools qml6-module-qttest qml6-module-qtquick \
+            qml6-module-qtqml-workerscript qml6-module-qtquick-window
+
+      - name: Run the tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: sh tests/run.sh
+
+  shell:
+    name: Shell scripts
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends shellcheck
+          shellcheck install.sh bin/dwc tests/run.sh tools/capture.sh
+
+      - name: The one-line installer, end to end in a throwaway HOME
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          printf '#!/bin/sh\nexit 1\n' > "$RUNNER_TEMP/bin/quickshell"
+          chmod +x "$RUNNER_TEMP/bin/quickshell"
+          export HOME="$RUNNER_TEMP/home"
+          mkdir -p "$HOME"
+          PATH="$RUNNER_TEMP/bin:$PATH" sh install.sh --no-start --no-autostart
+          test -L "$HOME/.config/quickshell/desktop-widget-control"
+          test -L "$HOME/.local/bin/dwc"
+          sh install.sh --uninstall
+          test ! -e "$HOME/.config/quickshell/desktop-widget-control"
+
+  site:
+    name: Site
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Every page links only to files that exist
+        run: python3 tests/check_site.py
