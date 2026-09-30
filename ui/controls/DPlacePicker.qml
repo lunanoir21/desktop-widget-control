@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell.Io
 import ".."
 import "../js/Countries.js" as Countries
+import "../js/Net.js" as Net
 
 // Choose a place: pick a country (or any), type a city, pick from what Open-Meteo
 // finds. `value` is the chosen place ({ name, admin, country, cc, lat, lon }) or
@@ -34,9 +35,8 @@ Item {
             return;
         }
         root.status = "searching";
-        proc.command = ["curl", "-fsS", "--max-time", "10",
-            "https://geocoding-api.open-meteo.com/v1/search?count=8&format=json&language=" + Str.lang
-            + "&name=" + encodeURIComponent(q) + (root.country !== "" ? "&countryCode=" + root.country : "")];
+        proc.command = Net.curl("https://geocoding-api.open-meteo.com/v1/search?count=8&format=json&language=" + Str.lang
+            + "&name=" + encodeURIComponent(q) + (root.country !== "" ? "&countryCode=" + root.country : ""), 10);
         proc.running = true;
     }
 
@@ -54,7 +54,7 @@ Item {
                     var j = JSON.parse(text);
                     var out = [];
                     var src = j.results || [];
-                    for (var i = 0; i < src.length; i++)
+                    for (var i = 0; i < Math.min(src.length, 8); i++)
                         out.push({ name: src[i].name, admin: src[i].admin1 || "", country: src[i].country || "",
                                    cc: src[i].country_code || "", lat: src[i].latitude, lon: src[i].longitude });
                     root.results = out;

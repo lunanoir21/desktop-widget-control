@@ -61,6 +61,19 @@ class Files(unittest.TestCase):
         self.assertTrue([f for f in fonts if f.endswith(".ttf")])
         self.assertTrue([f for f in fonts if f.startswith("OFL-")])
 
+    def test_network_reads_are_bounded(self):
+        """Every curl in the QML goes through js/Net.js (HTTPS only, a time limit and a
+        byte cap); none is spelled out on its own. A marketplace reviewer asked for this."""
+        for folder, _, files in os.walk(UI):
+            for f in files:
+                if f.endswith(".qml"):
+                    text = read(os.path.relpath(os.path.join(folder, f), ROOT))
+                    self.assertNotIn('"curl"', text, f"{f} runs curl itself; use Net.curl")
+        if os.path.exists(os.path.join(ROOT, "ui/scripts/usage.sh")):
+            script = read("ui/scripts/usage.sh")
+            self.assertIn("--max-filesize", script)
+            self.assertIn("head -c", script)
+
     def test_no_machine_specific_paths(self):
         # The project must run for anyone: nothing may point at one person's home.
         for dirpath, _, files in os.walk(ROOT):

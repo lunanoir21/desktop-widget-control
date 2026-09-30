@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3 — 2026-10-01
+
+- Network reads are bounded. The weather widget and the city search now run `curl` through one helper (`ui/js/Net.js`): HTTPS only, a time limit, and a hard cap of 128 KiB on what is read back, enforced by `head -c` so a server that streams without a length is cut off too. The forecast keeps at most 7 days and a city search at most 8 results. A test fails if any QML file runs `curl` on its own. (Thanks to the marketplace reviewer who pointed this out.)
+
 ## 0.1.2 — 2026-10-01
 
 - The tour's shortcut offer has a *Choose key…* button: hold your keys (Super, Ctrl, Alt, Shift and a letter, number or F-key), see them live, press Esc to save. If the key is taken nothing is written and it says so.

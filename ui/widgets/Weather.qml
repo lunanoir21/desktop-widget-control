@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell.Io
 import ".."
 import "../controls"
+import "../js/Net.js" as Net
 
 // Current weather and a short forecast from Open-Meteo (no key needed). The
 // city is looked up once, then the forecast is refreshed every 15 minutes.
@@ -67,9 +68,8 @@ DwcWidget {
             return;
         }
         if (root.geoFor !== root.city + "|" + Str.lang) {
-            geo.command = ["curl", "-fsS", "--max-time", "15",
-                "https://geocoding-api.open-meteo.com/v1/search?count=1&format=json&language=" + Str.lang
-                + "&name=" + encodeURIComponent(root.city)];
+            geo.command = Net.curl("https://geocoding-api.open-meteo.com/v1/search?count=1&format=json&language=" + Str.lang
+                + "&name=" + encodeURIComponent(root.city), 15);
             geo.running = true;
         } else {
             root.fetch();
@@ -78,10 +78,9 @@ DwcWidget {
 
     function fetch() {
         var unit = root.imperial ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "";
-        forecast.command = ["curl", "-fsS", "--max-time", "15",
-            "https://api.open-meteo.com/v1/forecast?latitude=" + root.lat + "&longitude=" + root.lon
+        forecast.command = Net.curl("https://api.open-meteo.com/v1/forecast?latitude=" + root.lat + "&longitude=" + root.lon
             + "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day"
-            + "&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5" + unit];
+            + "&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5" + unit, 15);
         forecast.running = true;
     }
 
@@ -132,7 +131,7 @@ DwcWidget {
                     root.cur = { t: Math.round(j.current.temperature_2m), feels: Math.round(j.current.apparent_temperature),
                                  code: j.current.weather_code, wind: Math.round(j.current.wind_speed_10m), day: j.current.is_day };
                     var d = [];
-                    for (var i = 0; i < j.daily.time.length; i++)
+                    for (var i = 0; i < Math.min(j.daily.time.length, 7); i++)   // we ask for 5; never keep more than 7
                         d.push({ date: j.daily.time[i], code: j.daily.weather_code[i],
                                  hi: Math.round(j.daily.temperature_2m_max[i]), lo: Math.round(j.daily.temperature_2m_min[i]) });
                     root.days = d;
