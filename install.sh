@@ -81,9 +81,11 @@ ask() {
 }
 
 here=""
-case "$0" in
-    */*) d=$(cd "$(dirname "$0")" 2>/dev/null && pwd) || d=""; [ -f "$d/shell.qml" ] && [ -d "$d/ui" ] && here=$d ;;
-esac
+# Run from a checkout ($0 is the script's own path). Piped into sh, $0 is just "sh".
+if [ -f "$0" ]; then
+    d=$(cd "$(dirname "$0")" 2>/dev/null && pwd) || d=""
+    if [ -n "$d" ] && [ -f "$d/shell.qml" ] && [ -d "$d/ui" ]; then here=$d; fi
+fi
 
 # ---- uninstall -------------------------------------------------------------
 if [ "$UNINSTALL" = yes ]; then
