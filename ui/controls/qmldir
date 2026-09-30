@@ -1,0 +1,14 @@
+DText 1.0 DText.qml
+DIcon 1.0 DIcon.qml
+DButton 1.0 DButton.qml
+DSwitch 1.0 DSwitch.qml
+DSlider 1.0 DSlider.qml
+DSegmented 1.0 DSegmented.qml
+DSelect 1.0 DSelect.qml
+DColorPick 1.0 DColorPick.qml
+DTextField 1.0 DTextField.qml
+DTextArea 1.0 DTextArea.qml
+DBarGraph 1.0 DBarGraph.qml
+DSpectrum 1.0 DSpectrum.qml
+DWaveProgress 1.0 DWaveProgress.qml
+DPlacePicker 1.0 DPlacePicker.qml
