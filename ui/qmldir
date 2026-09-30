@@ -1,0 +1,20 @@
+singleton DwcStore 1.0 DwcStore.qml
+singleton DwcTheme 1.0 DwcTheme.qml
+singleton DwcData 1.0 DwcData.qml
+singleton Str 1.0 Str.qml
+
+DwcHost 1.0 DwcHost.qml
+DwcLayer 1.0 DwcLayer.qml
+DwcFrame 1.0 DwcFrame.qml
+DwcCard 1.0 DwcCard.qml
+DwcWidget 1.0 DwcWidget.qml
+DwcNeed 1.0 DwcNeed.qml
+DwcMaskRegion 1.0 DwcMaskRegion.qml
+DwcEditor 1.0 DwcEditor.qml
+DwcOptionRow 1.0 DwcOptionRow.qml
+DwcInspector 1.0 DwcInspector.qml
+DwcLibrary 1.0 DwcLibrary.qml
+DwcLibCard 1.0 DwcLibCard.qml
+DwcHandle 1.0 DwcHandle.qml
+DwcOnboarding 1.0 DwcOnboarding.qml
+DwcTourArt 1.0 DwcTourArt.qml
