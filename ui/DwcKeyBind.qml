@@ -10,7 +10,7 @@ Column {
     id: root
 
     readonly property bool hyprland: (Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") || "") !== ""
-    // idle | busy | ok | exists | nohypr | fail
+    // idle | busy | ok | exists | nohypr | taken | fail
     property string result: "idle"
     property string keys: ""
     property string file: ""
@@ -59,9 +59,9 @@ Column {
     }
 
     DText {
-        visible: root.result === "nohypr"
+        visible: root.result === "nohypr" || root.result === "taken"
         font.pixelSize: 12
         color: DwcTheme.muted
-        text: Str.t("tour.keyNone")
+        text: root.result === "taken" ? Str.t("tour.keyTaken") : Str.t("tour.keyNone")
     }
 }

@@ -66,6 +66,32 @@ class Bind(unittest.TestCase):
         self.assertIn("bind = SUPER, G", self.read("hypr", "bindings.conf"))
         self.assertNotIn("desktop-widget-control", self.read("hypr", "hyprland.conf"))
 
+    def fake_binds(self, binds):
+        """A hyprctl that reports `binds` (modmask, key) as already taken."""
+        import json
+        rows = json.dumps([{"modmask": m, "key": k} for m, k in binds])
+        with open(os.path.join(self.bin, "hyprctl"), "w") as f:
+            f.write("#!/bin/sh\n[ \"$1\" = binds ] && echo '%s'\nexit 0\n" % rows)
+
+    @unittest.skipUnless(shutil.which("jq"), "needs jq")
+    def test_a_taken_key_is_skipped_for_a_free_one(self):
+        self.write("hyprland.conf", "")
+        self.fake_binds([(64, "G")])
+        self.assertEqual(self.run_script()[1], "SUPER SHIFT + G")
+        self.assertIn("bind = SUPER SHIFT, G, exec,", self.read("hypr", "hyprland.conf"))
+
+    @unittest.skipUnless(shutil.which("jq"), "needs jq")
+    def test_when_several_are_taken_it_moves_on_and_when_all_are_it_changes_nothing(self):
+        self.write("hyprland.lua", "")
+        self.fake_binds([(64, "G"), (65, "G"), (72, "G"), (68, "G")])
+        self.assertEqual(self.run_script()[1], "SUPER + F12")
+        self.assertIn('hl.bind("SUPER + F12"', self.read("hypr", "hyprland.lua"))
+        self.write("hyprland.conf", "")
+        os.remove(os.path.join(self.hypr, "hyprland.lua"))
+        self.fake_binds([(64, "G"), (65, "G"), (72, "G"), (68, "G"), (64, "F12"), (65, "F12")])
+        self.assertEqual(self.run_script()[0], "taken")
+        self.assertEqual(self.read("hypr", "hyprland.conf"), "")
+
     def test_running_twice_adds_it_once(self):
         self.write("hyprland.conf", "")
         self.run_script()

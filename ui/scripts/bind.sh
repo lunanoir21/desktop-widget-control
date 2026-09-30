@@ -7,8 +7,10 @@
 #   ok      added; KEYS is the key, FILE the file it went into
 #   exists  a Desktop Widget Control key is already set up
 #   nohypr  no Hyprland config found
+#   taken   every key it tries is already bound
 #   fail    could not write
-# SUPER + G is used when free, else SUPER SHIFT + G, else SUPER ALT + G.
+# SUPER + G is used when free, else SUPER SHIFT + G, SUPER ALT + G, SUPER CTRL + G,
+# SUPER + F12, SUPER SHIFT + F12: the first that nothing else uses.
 CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 HDIR=$CONFIG_HOME/hypr
 MARK="desktop-widget-control"
@@ -38,17 +40,24 @@ fi
 # Is this modifier mask + key already bound? (Needs jq; without it we go ahead.)
 taken() {
     command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 || return 1
-    hyprctl binds -j 2>/dev/null | jq -e --argjson m "$1" 'any(.[]; .modmask == $m and (.key | ascii_downcase) == "g")' >/dev/null 2>&1
+    hyprctl binds -j 2>/dev/null | jq -e --argjson m "$1" --arg k "$2" 'any(.[]; .modmask == $m and (.key | ascii_downcase) == $k)' >/dev/null 2>&1
 }
-MODS="SUPER ALT"
-if ! taken 64; then MODS="SUPER"; elif ! taken 65; then MODS="SUPER SHIFT"; fi
+# The first free one of these: modifier mask, modifiers, key.
+MODS=""
+KEY=""
+for c in "64 SUPER g" "65 SUPER_SHIFT g" "72 SUPER_ALT g" "68 SUPER_CTRL g" "64 SUPER f12" "65 SUPER_SHIFT f12"; do
+    # shellcheck disable=SC2086
+    set -- $c
+    if ! taken "$1" "$3"; then MODS=$(printf '%s' "$2" | tr _ ' '); KEY=$(printf '%s' "$3" | tr '[:lower:]' '[:upper:]'); break; fi
+done
+[ -n "$KEY" ] || { echo "taken||"; exit 0; }
 
 if [ "$KIND" = lua ]; then
     # "SUPER SHIFT" is written "SUPER + SHIFT" in Lua.
     LUAKEYS=$(printf '%s' "$MODS" | sed 's/ / + /g')
-    printf '\n-- Desktop Widget Control: open the editor with a key. (%s)\nhl.bind("%s + G", hl.dsp.exec_cmd("%s"))\n' "$MARK" "$LUAKEYS" "$CMD" >> "$TARGET" || { echo "fail||$TARGET"; exit 0; }
+    printf '\n-- Desktop Widget Control: open the editor with a key. (%s)\nhl.bind("%s + %s", hl.dsp.exec_cmd("%s"))\n' "$MARK" "$LUAKEYS" "$KEY" "$CMD" >> "$TARGET" || { echo "fail||$TARGET"; exit 0; }
 else
-    printf '\n# Desktop Widget Control: open the editor with a key. (%s)\nbind = %s, G, exec, %s\n' "$MARK" "$MODS" "$CMD" >> "$TARGET" || { echo "fail||$TARGET"; exit 0; }
+    printf '\n# Desktop Widget Control: open the editor with a key. (%s)\nbind = %s, %s, exec, %s\n' "$MARK" "$MODS" "$KEY" "$CMD" >> "$TARGET" || { echo "fail||$TARGET"; exit 0; }
 fi
 hyprctl reload >/dev/null 2>&1
-echo "ok|$MODS + G|$TARGET"
+echo "ok|$MODS + $KEY|$TARGET"
