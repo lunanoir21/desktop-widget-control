@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+graphify-out/
+*.qmlc
+.qmlls.ini
+.impeccable/
