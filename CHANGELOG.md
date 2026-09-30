@@ -1,0 +1,26 @@
+# Changelog
+
+## 0.1.0 — 2026-09-30
+
+First version.
+
+- Sixteen modules: six clocks (LED pixel, analog, serif, poster, mono with seconds, world), five system monitors (CPU graph, RAM ring, disk, network, temperature), a media player for any MPRIS player, a calendar, weather from Open-Meteo, a pomodoro timer and a checklist. Most come in several sizes (S, M, L, W).
+- The editor: a widget library with live thumbnails, drag and drop onto a snapping grid, resizing by preset, an inspector built from each module's options, duplicate, lock, delete, arrow-key nudging, panels that slide out of the way while you drag and open on the side away from the widget being edited, a top bar to bring them back, and a key (Tab) to hide them.
+- The weather widget has a place picker: choose a country (or any), type a city and pick it from what Open-Meteo finds; older layouts that stored a plain city name keep working.
+- The poster clock is a lock-screen look in three styles: classic (the weekday in large spaced capitals, the date and a small time under it), cut letters (the weekday sliced across the middle) and sign (an outlined weekday over a strip of date, week, day of the year and time; narrow cards keep the date and the time). Modules can now start with their own appearance (it starts without a card).
+- Styles: the LED clock has classic, ring (a dotted ring that fills with the seconds or the minutes) and day strip (the week's days and the day's 24 hours); the CPU graph and the network widget draw btop-style bars by default (colour follows the load, the CPU scale adapts to recent peaks) with the old lines as a style.
+- The media player has a live audio visualizer fed by `cava`: the progress bar itself becomes the spectrum (played bars lit, the rest faint), or a soft spectrum rises behind the card, which only runs while music plays and is skipped when cava is not installed.
+- The media player has a *Wide strip* style (cover, text, a long spectrum progress bar and big transport buttons in one row) and a new extra-wide size X (20×4 cells); clicking the progress bar seeks. Any widget can be put in the exact middle of the screen with the inspector's *Centre* buttons or `dwc center`.
+- Options can depend on another (`when` in the catalogue): the ring's "shows" choice only appears for the ring style.
+- Nine themes (text contrast checked by the tests) and Turkish and English.
+- Data sources run only while a widget needs them and are shared; the desktop surface is click-through except for widgets that have buttons.
+- IPC (`desktopWidgets`) and the `dwc` helper for everything the editor does; the layout is one JSON file that is reloaded when edited by hand.
+- Runs on its own (`quickshell -c desktop-widget-control`) or inside an existing shell with one `DwcHost {}`. Fonts are bundled.
+- `dwc hide` / `dwc unhide` hide and bring back every widget (hidden widgets also stop reading data).
+- Saved layouts are repaired on load: a widget that is off-screen or sits on another is moved to the nearest free spot.
+- The media player has two more looks for the extra-wide size: *Pill* (a rounded capsule with a ringed cover and the spectrum in the middle) and *Oscilloscope* (a live trace in place of the bars).
+- A first-run tour (six steps: edit, drag, style, theme, done) opens on the first start; `dwc tour` brings it back.
+- One-line installer (`install.sh`, also `--uninstall`, `--dry-run`), the `dwc start/stop/restart` commands, an app-menu entry and icon, an Arch `PKGBUILD`, and the Mozaik logo.
+- A GitHub Pages site with a theme picker whose screenshots follow the theme, and screenshot tooling (`tools/site_shots.py`).
+- GitHub Actions: tests, shellcheck, an installer end-to-end run, a site check, Pages deployment and tagged releases.
+- Tests: `tests/run.sh` (layout maths, module catalogue, strings, theme contrast, icons, file-tree checks), run by GitHub Actions on every push.
