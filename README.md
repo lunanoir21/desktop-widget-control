@@ -59,6 +59,9 @@ curl -fsSL https://raw.githubusercontent.com/lunanoir21/desktop-widget-control/m
 It fetches the project, links it in, adds an app-menu entry, offers the Hyprland autostart line and `Super+G` for the editor, and starts it. The first run opens a short tour. `dwc start` / `dwc toggle` from then on.
 
 - **Omarchy:** `omarchy plugin add https://github.com/lunanoir21/desktop-widget-control-omarchy.git --enable`
+
+  > **Don't forget the keybind.** The plugin does not add a key on its own, and without one there is no way to open the editor. Bind a key to `qs ipc call desktopWidgets toggle`; the first-run tour also offers to add `SUPER + G` (or the first free key like it) for you.
+
 - **Arch:** `cd packaging && makepkg -si`
 - **By hand:**
 

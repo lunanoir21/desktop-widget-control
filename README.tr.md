@@ -55,6 +55,9 @@ curl -fsSL https://raw.githubusercontent.com/lunanoir21/desktop-widget-control/m
 Projeyi indirir, bağlar, uygulama menüsüne giriş ekler, Hyprland otomatik başlatmasını ve düzenleyici için `Super+G` tuşunu önerir ve başlatır. İlk açılışta kısa bir tur açılır. Sonra `dwc start` / `dwc toggle`.
 
 - **Omarchy:** `omarchy plugin add https://github.com/lunanoir21/desktop-widget-control-omarchy.git --enable`
+
+  > **Kısayolu ayarlamayı unutma.** Eklenti kendi başına bir tuş eklemez; tuş olmadan düzenleyiciyi açmanın yolu yok. Bir tuşu `qs ipc call desktopWidgets toggle` komutuna bağla; ilk açılış turu da senin için `SUPER + G` (doluysa ona benzer ilk boş tuş) eklemeyi önerir.
+
 - **Arch:** `cd packaging && makepkg -si`
 - **Elle:**
 

@@ -102,6 +102,7 @@ section .sub { color: var(--sub); max-width: 680px; margin: 0 0 36px; font-size:
 .mod b { display: block; font: 600 15px var(--display); }
 .mod span { font: 11px var(--mono); color: var(--muted); }
 .mod p { margin: 6px 0 0; font-size: 13px; line-height: 1.45; color: var(--sub); }
+.warnbox { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--acc2); background: color-mix(in srgb, var(--acc2) 12%, transparent); color: var(--fg); font-size: 14px; line-height: 1.5; }
 .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
 .tabs button[aria-selected="true"] { background: var(--acc); color: var(--onacc); border-color: var(--acc); }
 .panel { padding: 22px; border-radius: 18px; background: var(--card); border: 1px solid var(--hair); }
@@ -243,6 +244,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wr
     <div class="panel" data-panel="one"><pre>curl -fsSL https://raw.githubusercontent.com/lunanoir21/desktop-widget-control/main/install.sh | sh</pre>
       <p class="note" style="margin:12px 0 0"><span data-en>Needs Quickshell. Run it again any time to update; <code>install.sh --uninstall</code> removes everything it added (your layout stays).</span><span data-tr>Quickshell gerekir. Güncellemek için istediğin zaman yeniden çalıştır; <code>install.sh --uninstall</code> eklediği her şeyi kaldırır (düzenin kalır).</span></p></div>
     <div class="panel" data-panel="omarchy" hidden><pre>omarchy plugin add https://github.com/lunanoir21/desktop-widget-control-omarchy.git --enable</pre>
+      <div class="warnbox" role="note"><b><span data-en>Don't forget the keybind.</span><span data-tr>Kısayolu ayarlamayı unutma.</span></b> <span data-en>The plugin adds no key on its own, and without one you cannot open the editor. Bind a key to <code>qs ipc call desktopWidgets toggle</code>; the first-run tour also offers to add <code>SUPER + G</code> for you.</span><span data-tr>Eklenti kendi başına bir tuş eklemez; tuş olmadan düzenleyiciyi açamazsın. Bir tuşu <code>qs ipc call desktopWidgets toggle</code> komutuna bağla; ilk açılış turu da senin için <code>SUPER + G</code> eklemeyi önerir.</span></div>
       <p class="note" style="margin:12px 0 0"><span data-en>The Omarchy package is a thin wrapper around this project, like my other plugins.</span><span data-tr>Omarchy paketi bu projenin ince bir sarmalayıcısıdır, diğer eklentilerim gibi.</span></p></div>
     <div class="panel" data-panel="arch" hidden><pre>git clone https://github.com/lunanoir21/desktop-widget-control
 cd desktop-widget-control/packaging &amp;&amp; makepkg -si</pre></div>
