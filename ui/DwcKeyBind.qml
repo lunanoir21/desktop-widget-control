@@ -4,13 +4,13 @@ import Quickshell.Io
 import "controls"
 
 // The first-run tour's offer to bind a key to the editor (Hyprland only; other
-// compositors get the lines to copy). The work is ui/scripts/keybind.sh, so
+// compositors get the lines to copy). The work is ui/scripts/bind.sh, so
 // nothing is changed until the button is pressed.
 Column {
     id: root
 
     readonly property bool hyprland: (Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") || "") !== ""
-    // idle | busy | ok | exists | lua | nohypr | fail
+    // idle | busy | ok | exists | nohypr | fail
     property string result: "idle"
     property string keys: ""
     property string file: ""
@@ -19,7 +19,7 @@ Column {
 
     Process {
         id: proc
-        command: ["sh", Qt.resolvedUrl("scripts/keybind.sh").toString().replace("file://", "")]
+        command: ["sh", Qt.resolvedUrl("scripts/bind.sh").toString().replace("file://", "")]
         stdout: StdioCollector {
             onStreamFinished: {
                 var p = text.trim().split("|");
@@ -56,16 +56,6 @@ Column {
         wrapMode: Text.WordWrap
         text: root.result === "ok" ? Str.t("tour.keyOk").replace("%1", root.keys).replace("%2", root.file.replace(/^.*\//, ""))
                                    : Str.t("tour.keyExists")
-    }
-
-    Column {
-        visible: root.result === "lua"
-        spacing: 6
-        DText { font.pixelSize: 12; color: DwcTheme.muted; text: Str.t("tour.keyLua") }
-        Rectangle {
-            height: 28; width: luaLine.implicitWidth + 24; radius: 8; color: DwcTheme.alt; border.width: 1; border.color: DwcTheme.line
-            DText { id: luaLine; anchors.centerIn: parent; face: "mono"; font.pixelSize: 11; color: DwcTheme.sub; text: root.keys }
-        }
     }
 
     DText {
