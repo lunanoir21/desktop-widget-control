@@ -29,7 +29,7 @@ Desktop Widget Control draws widgets on the desktop layer, above your wallpaper 
 <img src="docs/screenshots/moss/editor.webp" width="880" alt="The editor: the widget library on the left, the desktop with a grid in the middle, the inspector for the selected widget on the right">
 </div>
 
-- **16 modules**, each with a few sizes: six clocks, five system monitors, a media player, a calendar, weather, a pomodoro timer and a checklist.
+- **17 modules**, each with a few sizes: six clocks, five system monitors, a media player, a calendar, weather, a pomodoro timer, a checklist and Claude / Codex usage limits.
 - **A real editor.** Library with live thumbnails, drag and drop, cell snapping, resize by preset, an inspector generated from each module's options, duplicate, lock, delete, arrow-key nudging.
 - **Styles.** Several modules have a *Style* option in the inspector; it swaps the whole look while the other options keep working.
 - **Everything is an option.** Colours follow the theme or are set by hand; background, opacity, radius, padding, shadow and outline are per widget.
@@ -119,6 +119,7 @@ If you already run a Quickshell shell of your own, you do not need a second proc
 | **Media player** | S M L W X | any MPRIS player (Spotify, mpv, a browser…): cover, title, progress, buttons, and a live cava spectrum woven into the progress bar (or rising softly behind the card); a *Wide strip* style lays it all out in one row, click the bar to seek |
 | **Calendar** | M L | month grid; today's date beside it when medium |
 | **Weather** | S M L | current conditions and a forecast from Open-Meteo; pick a country and a city from a searchable list |
+| **AI limits** | M W | the 5-hour and weekly limits of Claude and Codex, as twin rings or LED dots (see [AI limits](#ai-limits)) |
 | **Pomodoro** | S M | focus / break timer; click the ring to start |
 | **Notes** | M L | a checklist you can tick on the desktop |
 
@@ -130,6 +131,16 @@ Sizes are grid presets: S is 4×4 cells, M 8×4, L 8×8, W 12×4, and X 20×4 fo
 <img src="docs/screenshots/moss/cpu-graph.webp" width="430" alt="The CPU graph">
 <img src="docs/screenshots/moss/calendar.webp" width="430" alt="The calendar">
 </div>
+
+## AI limits
+
+The *AI limits* widget shows how much of the 5-hour and weekly limits you have used in Claude and Codex, as twin rings (outer = 5 hours, inner = week) or LED dots. It turns red above the warning level you set.
+
+- **Codex** needs nothing: it reads the newest rate-limit line Codex wrote into `~/.codex/sessions`. The number is from the last time Codex ran, so it can be old; the widget says how old.
+- **Claude** has two sources. By default it reads a capture of Claude Code's status line: point `statusLine` in `~/.claude/settings.json` at `ui/scripts/claude-statusline.sh` followed by your current status line command (the script's header explains it). It writes one file under `~/.local/state/desktop-widget-control/` and uses no network. If you use [flare](https://github.com/lunanoir21/flare) its capture works as well.
+- **Claude: official API** (off by default) reads the token Claude Code keeps in `~/.claude/.credentials.json` and asks `api.anthropic.com/api/oauth/usage` every five minutes. That endpoint is not documented by Anthropic; switch it on only if you are comfortable with that.
+
+The Claude and OpenAI marks are trademarks of their owners; this project is not affiliated with either company.
 
 ## Themes
 

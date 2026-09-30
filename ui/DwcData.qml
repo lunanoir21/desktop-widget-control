@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "js/Usage.js" as Usage
 
 // The one place system numbers are read.
 //
@@ -323,6 +324,86 @@ Item {
             }
         }
         onRunningChanged: if (!running) root.spectrum = []
+    }
+
+    // ---- AI usage limits ---------------------------------------------------------
+    // "usage" reads files only (Codex's session logs, a Claude status line
+    // capture); "usageApi" is the opt-in Claude endpoint and asks at most every
+    // five minutes, since the endpoint rate-limits hard.
+    property var codexUsage: null         // Usage.js reading or null
+    property var claudeUsage: null
+    property var claudeCapture: null
+    property var claudeApi: null
+    property string claudeApiNote: ""     // "", "expired", "failed", "none"
+    readonly property string usageScript: Qt.resolvedUrl("scripts/usage.sh").toString().replace("file://", "")
+
+    function claudeMerge() {
+        root.claudeUsage = Usage.newer(root.claudeCapture, root.claudeApi);
+    }
+
+    function sections(text) {
+        var out = {};
+        var parts = text.split(/^@/m);
+        for (var i = 0; i < parts.length; i++) {
+            var nl = parts[i].indexOf("\n");
+            if (nl < 0)
+                continue;
+            var head = parts[i].substr(0, nl).trim().split(" ");
+            out[head[0]] = { arg: head[1] || "", body: parts[i].substr(nl + 1).trim() };
+        }
+        return out;
+    }
+
+    Timer {
+        interval: Math.max(30000, root.interval("usage"))
+        running: root.active("usage")
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            if (!usageProc.running)
+                usageProc.running = true;
+        }
+    }
+
+    Process {
+        id: usageProc
+        command: ["sh", root.usageScript, "local"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var s = root.sections(text);
+                root.codexUsage = s["codex"] ? Usage.parseCodex(s["codex"].body) : null;
+                root.claudeCapture = s["claude-capture"] ? Usage.parseClaudeCapture(s["claude-capture"].body, s["claude-capture"].arg) : null;
+                root.claudeMerge();
+            }
+        }
+    }
+
+    Timer {
+        interval: 300000
+        running: root.active("usageApi")
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            if (!usageApiProc.running)
+                usageApiProc.running = true;
+        }
+    }
+
+    Process {
+        id: usageApiProc
+        command: ["sh", root.usageScript, "api"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var s = root.sections(text);
+                if (s["claude-api"]) {
+                    root.claudeApi = Usage.parseClaudeApi(s["claude-api"].body, s["claude-api"].arg);
+                    root.claudeApiNote = root.claudeApi ? "" : "failed";
+                } else {
+                    root.claudeApiNote = s["claude-api-expired"] ? "expired" : (s["claude-api-none"] ? "none" : "failed");
+                }
+                root.claudeMerge();
+            }
+        }
     }
 
     // ---- formatting helpers the widgets share --------------------------------

@@ -263,6 +263,27 @@ var modules = [
         ]
     },
     {
+        type: "usage-limits", category: "media", name: T("AI limits", "YZ limitleri"),
+        sizes: ["M", "W"], size: "M", interactive: false, source: "widgets/UsageLimits.qml",
+        opts: [
+            { key: "look", type: "select", label: T("Style", "Stil"), def: "rings", choices: [
+                { v: "rings", label: T("Twin rings", "Çift halka") },
+                { v: "led",   label: T("LED dots", "LED nokta") }
+            ] },
+            { key: "show", type: "select", label: T("Show", "Göster"), def: "both", choices: [
+                { v: "both",   label: T("Claude and Codex", "Claude ve Codex") },
+                { v: "claude", label: T("Claude only", "Yalnızca Claude") },
+                { v: "codex",  label: T("Codex only", "Yalnızca Codex") }
+            ] },
+            { key: "warn", type: "range", label: T("Warn above", "Uyarı eşiği"), def: 90, min: 50, max: 99, step: 1, unit: "%" },
+            { key: "claudeApi", type: "toggle", label: T("Claude: official API", "Claude: resmi API"), def: false,
+              hint: T("Reads the token Claude Code keeps and asks api.anthropic.com every 5 minutes. Off: only the status line capture.",
+                      "Claude Code'un token'ını okuyup 5 dakikada bir api.anthropic.com'a sorar. Kapalı: yalnızca status line yakalaması.") },
+            color("color", "primary", T("Codex colour", "Codex rengi")),
+            color("color2", "secondary", T("Claude colour", "Claude rengi"))
+        ]
+    },
+    {
         type: "calendar", category: "media", name: T("Calendar", "Takvim"),
         sizes: ["M", "L"], size: "L", interactive: false, source: "widgets/Calendar.qml",
         opts: [

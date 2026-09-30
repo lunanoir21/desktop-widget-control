@@ -1,5 +1,6 @@
 DText 1.0 DText.qml
 DIcon 1.0 DIcon.qml
+DLogo 1.0 DLogo.qml
 DButton 1.0 DButton.qml
 DSwitch 1.0 DSwitch.qml
 DSlider 1.0 DSlider.qml

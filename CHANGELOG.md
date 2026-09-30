@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0 — unreleased
+
+- New module: *AI limits*, the 5-hour and weekly limits of Claude and Codex as twin rings (outer = 5 hours, inner = week) or LED dots, red above a warning level you set. Codex is read from its own session logs; Claude from a capture of Claude Code's status line (`ui/scripts/claude-statusline.sh`, no network) or, as an opt-in, from the usage endpoint. Numbers that are old say how old; a window whose reset time has passed reads empty.
+- The Claude and OpenAI marks are drawn from Simple Icons (CC0); they are trademarks of their owners and the project is not affiliated with either.
+
 ## 0.1.3 — 2026-10-01
 
 - Network reads are bounded. The weather widget and the city search now run `curl` through one helper (`ui/js/Net.js`): HTTPS only, a time limit, and a hard cap of 128 KiB on what is read back, enforced by `head -c` so a server that streams without a length is cut off too. The forecast keeps at most 7 days and a city search at most 8 results. A test fails if any QML file runs `curl` on its own. (Thanks to the marketplace reviewer who pointed this out.)

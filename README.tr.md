@@ -25,7 +25,7 @@ Widget'ları masaüstü katmanına çizer: duvar kağıdının üstünde, tüm p
 <img src="docs/screenshots/moss/editor.webp" width="880" alt="Düzenleyici: solda widget kütüphanesi, ortada ızgaralı masaüstü, sağda seçili widget'ın paneli">
 </div>
 
-- **16 modül**, her birinin birkaç boyutu var: altı saat, beş sistem monitörü, müzik oynatıcı, takvim, hava durumu, pomodoro ve yapılacaklar listesi.
+- **17 modül**, her birinin birkaç boyutu var: altı saat, beş sistem monitörü, müzik oynatıcı, takvim, hava durumu, pomodoro, yapılacaklar listesi ve Claude / Codex kullanım limitleri.
 - **Gerçek bir düzenleyici.** Canlı önizlemeli kütüphane, sürükle-bırak, hücreye yapışma, hazır boyutlarla yeniden boyutlandırma, her modülün seçeneklerinden otomatik üretilen özellik paneli, kopyalama, kilitleme, silme, ok tuşlarıyla kaydırma.
 - **Stiller.** Birçok modülün panelde bir *Stil* seçeneği var; bütün görünümü değiştirir, diğer seçenekler çalışmaya devam eder.
 - **Her şey bir seçenek.** Renkler temayı izler ya da elle seçilir; arka plan, opaklık, yarıçap, dolgu, gölge ve çerçeve widget başınadır.
@@ -115,10 +115,21 @@ Zaten kendi Quickshell shell'ini çalıştırıyorsan ikinci bir süreç gerekme
 | **Müzik oynatıcı** | S M L W X | herhangi bir MPRIS oynatıcı (Spotify, mpv, tarayıcı…): kapak, başlık, ilerleme, düğmeler ve ilerleme çubuğuna işlenmiş (ya da kartın arkasından yumuşakça yükselen) canlı cava spektrumu; *Geniş şerit* stili her şeyi tek satıra dizer, çubuğa tıklayınca sarar |
 | **Takvim** | M L | ay ızgarası; orta boyutta yanında bugünün tarihi |
 | **Hava durumu** | S M L | Open-Meteo'dan anlık durum ve tahmin; ülke ve şehir aranabilir listeden seçilir |
+| **YZ limitleri** | M W | Claude ve Codex'in 5 saatlik ve haftalık limitleri; çift halka ya da LED nokta ([YZ limitleri](#yz-limitleri)) |
 | **Pomodoro** | S M | odak / mola sayacı; başlatmak için halkaya tıkla |
 | **Notlar** | M L | masaüstünde işaretleyebileceğin bir liste |
 
 Boyutlar ızgara hazırlarıdır: S 4×4 hücre, M 8×4, L 8×8, W 12×4, bir de ekranın ortasından geçen şerit için X 20×4 (bir hücre varsayılan olarak 40 px, Ayarlar'dan değişir). Özellik panelindeki *Ortala* düğmeleri seçili widget'ı ekranın ortasına, yatayda ya da dikeyde alır. Her modülün seçenekleri [`ui/js/Modules.js`](ui/js/Modules.js) içinde listelenir; özellik paneli de aynı listeden üretilir.
+
+## YZ limitleri
+
+*YZ limitleri* widget'ı Claude ve Codex'te 5 saatlik ve haftalık limitlerinin ne kadarını kullandığını çift halka (dış halka 5 saat, iç halka hafta) ya da LED nokta olarak gösterir. Belirlediğin uyarı eşiğini aşınca kırmızıya döner.
+
+- **Codex** hiçbir şey istemez: Codex'in `~/.codex/sessions` içine yazdığı en yeni limit satırını okur. Değer Codex'in son çalıştığı andan kalmadır, eski olabilir; widget ne kadar eski olduğunu söyler.
+- **Claude**'un iki kaynağı var. Varsayılan olarak Claude Code'un status line yakalamasını okur: `~/.claude/settings.json` içindeki `statusLine`'ı `ui/scripts/claude-statusline.sh` ve ardından mevcut status line komutuna yönlendir (script'in başındaki açıklama anlatır). `~/.local/state/desktop-widget-control/` altına tek bir dosya yazar, ağ kullanmaz. [flare](https://github.com/lunanoir21/flare) kullanıyorsan onun yakalaması da çalışır.
+- **Claude: resmi API** (varsayılan kapalı) Claude Code'un `~/.claude/.credentials.json` içinde tuttuğu token'ı okur ve beş dakikada bir `api.anthropic.com/api/oauth/usage` adresine sorar. Bu uç nokta Anthropic tarafından belgelenmemiş; yalnızca bunu kabul ediyorsan aç.
+
+Claude ve OpenAI logoları ilgili sahiplerinin ticari markasıdır; proje iki şirketle de bağlantılı değildir.
 
 ## Temalar
 

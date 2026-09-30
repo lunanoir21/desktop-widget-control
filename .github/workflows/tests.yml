@@ -33,7 +33,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends shellcheck
-          shellcheck install.sh bin/dwc tests/run.sh tools/capture.sh ui/scripts/bind.sh
+          shellcheck install.sh bin/dwc tests/run.sh tools/capture.sh ui/scripts/bind.sh ui/scripts/usage.sh ui/scripts/claude-statusline.sh
 
       - name: The one-line installer, end to end in a throwaway HOME
         run: |

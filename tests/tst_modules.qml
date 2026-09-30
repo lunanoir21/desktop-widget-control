@@ -178,6 +178,6 @@ TestCase {
         compare(Modules.byType("nope"), null);
         compare(Modules.inCategory("clock").length, 6);
         compare(Modules.inCategory("system").length, 5);
-        compare(Modules.inCategory("media").length, 5);
+        compare(Modules.inCategory("media").length, 6);
     }
 }
