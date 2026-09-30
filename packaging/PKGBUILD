@@ -1,6 +1,6 @@
 # Maintainer: luna (@lunanoir21)
 pkgname=desktop-widget-control
-pkgver=0.1.3
+pkgver=0.2.0
 pkgrel=1
 pkgdesc='Live desktop widgets for Wayland (Quickshell), with an editor to place and style them'
 arch=('any')

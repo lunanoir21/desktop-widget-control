@@ -120,7 +120,8 @@ DwcWidget {
                         DText {
                             anchors.centerIn: parent
                             face: "mono"
-                            font.pixelSize: Math.round(rings.width * 0.2)
+                            font.pixelSize: Math.round(rings.width * 0.24)
+                            font.weight: Font.Medium
                             text: panel.modelData.five ? Math.round(panel.modelData.five.pct) : "–"
                         }
                     }
@@ -134,7 +135,7 @@ DwcWidget {
                             DLogo { name: panel.modelData.mark; size: Math.max(12, Math.round(root.height * 0.1)); color: panel.modelData.accent; anchors.verticalCenter: parent.verticalCenter }
                             DText {
                                 face: "display"
-                                font.pixelSize: Math.max(13, Math.round(root.height * 0.095))
+                                font.pixelSize: Math.max(14, Math.round(root.height * 0.105))
                                 font.weight: Font.DemiBold
                                 text: panel.modelData.title
                             }
@@ -143,24 +144,24 @@ DwcWidget {
                             visible: panel.modelData.five !== null
                             width: parent.width
                             face: "mono"
-                            font.pixelSize: Math.max(10, Math.round(root.height * 0.07))
-                            color: DwcTheme.sub
+                            font.pixelSize: Math.max(12, Math.round(root.height * 0.085))
+                            color: DwcTheme.fg
                             text: Str.t("usage.five") + " " + (panel.modelData.five ? Math.round(panel.modelData.five.pct) : 0) + "%"
                         }
                         DText {
                             visible: panel.modelData.week !== null
                             width: parent.width
                             face: "mono"
-                            font.pixelSize: Math.max(10, Math.round(root.height * 0.07))
-                            color: panel.modelData.week && Usage.level(panel.modelData.week.pct, root.warnAt) !== "ok" ? DwcTheme.danger : DwcTheme.sub
+                            font.pixelSize: Math.max(12, Math.round(root.height * 0.085))
+                            color: panel.modelData.week && Usage.level(panel.modelData.week.pct, root.warnAt) !== "ok" ? DwcTheme.danger : DwcTheme.fg
                             text: Str.t("usage.week") + " " + (panel.modelData.week ? Math.round(panel.modelData.week.pct) : 0) + "%"
                         }
                         DText {
                             visible: text !== ""
                             width: parent.width
                             face: "mono"
-                            font.pixelSize: Math.max(9, Math.round(root.height * 0.06))
-                            color: DwcTheme.muted
+                            font.pixelSize: Math.max(11, Math.round(root.height * 0.07))
+                            color: DwcTheme.sub
                             wrapMode: Text.WordWrap
                             maximumLineCount: 3
                             text: panel.modelData.note !== "" ? panel.modelData.note
@@ -177,7 +178,7 @@ DwcWidget {
     Component {
         id: ledLook
         Column {
-            spacing: Math.round(root.height * 0.06)
+            spacing: Math.round(root.height * 0.08)
 
             Repeater {
                 model: root.panels
@@ -187,55 +188,61 @@ DwcWidget {
                     width: parent.width
                     height: (parent.height - parent.spacing * (root.panels.length - 1)) / root.panels.length
 
-                    readonly property real nameW: Math.round(root.height * 0.3)
-                    readonly property real numW: Math.round(root.height * 0.42)
+                    readonly property real numPx: Math.round(root.height * 0.3)
+                    readonly property real small: Math.max(11, Math.round(root.height * 0.072))
+                    readonly property color lit: row.modelData.accent
+                    readonly property color off: DwcTheme.alpha(DwcTheme.fg, 0.13)
 
+                    // the mark over the name; the column is as wide as the wider of the two
                     Column {
                         id: nameCol
-                        width: row.nameW
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 3
-                        DLogo { name: row.modelData.mark; size: Math.max(16, Math.round(root.height * 0.15)); color: row.modelData.accent }
+                        spacing: 4
+                        DLogo { name: row.modelData.mark; size: Math.max(18, Math.round(root.height * 0.17)); color: row.lit }
                         DText {
                             face: "mono"
-                            font.pixelSize: Math.max(8, Math.round(root.height * 0.055))
-                            font.letterSpacing: 1
-                            color: DwcTheme.sub
+                            font.pixelSize: row.small
+                            font.weight: Font.Medium
+                            font.letterSpacing: 0.6
+                            color: DwcTheme.fg
                             text: row.modelData.title.toUpperCase()
                         }
                     }
 
+                    // the dotted number is measured with its widest value so the bars never move
+                    TextMetrics { id: widest; font: num.font; text: "100" }
                     DText {
                         id: num
-                        anchors { left: nameCol.right; verticalCenter: parent.verticalCenter }
-                        width: row.numW
+                        anchors { left: nameCol.right; leftMargin: Math.round(root.height * 0.07); verticalCenter: parent.verticalCenter }
+                        width: widest.advanceWidth
                         face: "dots"
-                        font.pixelSize: Math.round(root.height * 0.27)
+                        font.pixelSize: row.numPx
                         font.weight: Font.Black
                         color: row.modelData.five ? root.fillColor(row.modelData, row.modelData.five) : DwcTheme.muted
                         text: row.modelData.five ? Math.round(row.modelData.five.pct) : "--"
                     }
 
                     Column {
-                        anchors { left: num.right; right: parent.right; verticalCenter: parent.verticalCenter }
-                        spacing: Math.round(root.height * 0.045)
+                        anchors { left: num.right; leftMargin: Math.round(root.height * 0.07); right: parent.right; verticalCenter: parent.verticalCenter }
+                        spacing: Math.round(root.height * 0.05)
 
                         Repeater {
-                            model: [{ w: row.modelData.five, dim: 1 }, { w: row.modelData.week, dim: 0.6 }]
+                            model: [{ w: row.modelData.five, big: true }, { w: row.modelData.week, big: false }]
                             delegate: Row {
                                 id: dots
                                 required property var modelData
                                 readonly property int n: 18
                                 readonly property real gap: 2
-                                readonly property real d: Math.max(3, (parent.width - gap * (n - 1)) / n)
-                                spacing: gap
+                                readonly property real pitch: (parent.width - gap) / n
+                                readonly property real d: Math.max(3, pitch - gap) * (modelData.big ? 1 : 0.68)
+                                spacing: dots.pitch - dots.d
                                 Repeater {
                                     model: dots.n
                                     delegate: Rectangle {
                                         required property int index
                                         width: dots.d; height: dots.d; radius: dots.d / 2
-                                        color: dots.modelData.w && index < Math.round(dots.modelData.w.pct / 100 * dots.n)
-                                            ? Qt.alpha(root.fillColor(row.modelData, dots.modelData.w), dots.modelData.dim) : DwcTheme.track
+                                        color: dots.modelData.w && index < Math.ceil(dots.modelData.w.pct / 100 * dots.n - 0.001)
+                                            ? root.fillColor(row.modelData, dots.modelData.w) : row.off
                                     }
                                 }
                             }
@@ -243,13 +250,23 @@ DwcWidget {
                         DText {
                             width: parent.width
                             face: "mono"
-                            font.pixelSize: Math.max(8, Math.round(root.height * 0.055))
-                            color: DwcTheme.muted
+                            font.pixelSize: row.small
+                            color: DwcTheme.sub
                             elide: Text.ElideRight
-                            text: row.modelData.note !== "" ? row.modelData.note
-                                : row.modelData.stale !== "" ? Str.t("usage.asOf") + " " + row.modelData.stale + " " + Str.t("usage.ago")
-                                : row.modelData.resets !== "" ? Str.t("usage.resets") + " " + row.modelData.resets : ""
+                            text: row.modelData.note !== "" ? row.modelData.note : row.detail(row.modelData)
                         }
+                    }
+
+                    // "5h 16% · wk 62% · resets in 4h 14m", or how old the numbers are
+                    function detail(p) {
+                        var parts = [];
+                        if (p.five)
+                            parts.push(Str.t("usage.five") + " " + Math.round(p.five.pct) + "%");
+                        if (p.week)
+                            parts.push(Str.t("usage.week") + " " + Math.round(p.week.pct) + "%");
+                        parts.push(p.stale !== "" ? Str.t("usage.asOf") + " " + p.stale + " " + Str.t("usage.ago")
+                                   : p.resets !== "" ? Str.t("usage.resets") + " " + p.resets : "");
+                        return parts.filter(function (x) { return x !== ""; }).join(" · ");
                     }
                 }
             }
