@@ -74,6 +74,37 @@ class Files(unittest.TestCase):
             self.assertIn("--max-filesize", script)
             self.assertIn("head -c", script)
 
+    def test_outside_text_is_never_rich_text(self):
+        """Track titles, artists and other outside strings are shown through DText,
+        which must stay plain text: AutoText would let an <img> tag in a title make the
+        shell fetch a URL. No QML file may build a bare Text or turn rich text on."""
+        self.assertIn("textFormat: Text.PlainText", read("ui/controls/DText.qml"))
+        for folder, _, files in os.walk(UI):
+            for f in files:
+                if f.endswith(".qml") and f != "DText.qml":
+                    text = read(os.path.relpath(os.path.join(folder, f), ROOT))
+                    self.assertNotRegex(text, r"(?m)^\s*Text\s*\{", f"{f} builds a bare Text; use DText")
+                    self.assertNotRegex(text, r"Text\.(RichText|StyledText|AutoText|MarkdownText)", f"{f} enables rich text")
+
+    def test_user_text_and_files_are_bounded_and_private(self):
+        """Reviewer-class hardening: a layout file, a note and a temp file each have a limit or a
+        private home, so a huge or pre-linked input cannot exhaust memory or clobber a file."""
+        store = read("ui/DwcStore.qml")
+        self.assertIn("maxFileBytes", store)
+        self.assertIn("chmod 700", store)
+        self.assertIn("chmod 600", store)
+        self.assertIn("maxCfgString", store)
+        self.assertIn("maxLength", read("ui/controls/DTextArea.qml"))
+        self.assertIn("maximumLength", read("ui/controls/DTextField.qml"))
+        self.assertIn("i < 300", read("ui/widgets/Notes.qml"))
+        data = read("ui/DwcData.qml")
+        self.assertIn("mktemp", data)
+        self.assertNotIn("desktop-widget-control-cava.conf", data)
+
+    def test_cover_art_is_local_only(self):
+        """A player-supplied http(s) cover URL must not be fetched."""
+        self.assertIn('indexOf("file:///") === 0', read("ui/widgets/MediaPlayer.qml"))
+
     def test_no_machine_specific_paths(self):
         # The project must run for anyone: nothing may point at one person's home.
         for dirpath, _, files in os.walk(ROOT):

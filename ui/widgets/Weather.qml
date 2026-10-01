@@ -78,7 +78,7 @@ DwcWidget {
 
     function fetch() {
         var unit = root.imperial ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "";
-        forecast.command = Net.curl("https://api.open-meteo.com/v1/forecast?latitude=" + root.lat + "&longitude=" + root.lon
+        forecast.command = Net.curl("https://api.open-meteo.com/v1/forecast?latitude=" + Number(root.lat).toFixed(4) + "&longitude=" + Number(root.lon).toFixed(4)
             + "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day"
             + "&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5" + unit, 15);
         forecast.running = true;

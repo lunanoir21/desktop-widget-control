@@ -14,7 +14,7 @@ DwcWidget {
     readonly property var entries: {
         var lines = root.text.split("\n");
         var out = [];
-        for (var i = 0; i < lines.length; i++) {
+        for (var i = 0; i < lines.length && i < 300; i++) {   // a checklist, not a document: never build more rows than this
             var m = lines[i].match(/^\s*[-*]\s*\[( |x|X)\]\s?(.*)$/);
             if (m)
                 out.push({ line: i, kind: m[1] === " " ? "todo" : "done", label: m[2] });

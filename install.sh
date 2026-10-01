@@ -50,6 +50,11 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+# The ref ends up in a git command and a URL: a plain branch or tag name only.
+case $REF in
+    ""|-*|*..*|*[!A-Za-z0-9._/-]*) echo "invalid --ref: $REF" >&2; exit 1 ;;
+esac
+
 CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 BIN_DIR=${XDG_BIN_HOME:-$HOME/.local/bin}
@@ -149,7 +154,11 @@ else
         if [ "$DRY" = yes ]; then
             say "  (dry run) curl -fsSL https://github.com/$REPO/archive/$REF.tar.gz | tar -xz -C $SRC --strip-components=1"
         else
-            curl -fsSL "https://github.com/$REPO/archive/$REF.tar.gz" | tar -xz -C "$SRC" --strip-components=1
+            # To a file first: in a pipe a failed download would be hidden behind tar's status.
+            ARCHIVE=$(mktemp) || exit 1
+            trap 'rm -f "$ARCHIVE"' EXIT
+            curl -fsSL -o "$ARCHIVE" "https://github.com/$REPO/archive/$REF.tar.gz"
+            tar -xzf "$ARCHIVE" -C "$SRC" --strip-components=1
         fi
     else
         echo "need git, or curl and tar, to download the code" >&2
@@ -206,7 +215,7 @@ exec-once = quickshell -c desktop-widget-control
 bind = $KEY, exec, dwc toggle
 EOF2
             fi
-            run sh -c "printf '%s\\n' 'source = $SNIP $MARK' >> '$HCONF'"
+            run sh -c 'printf "%s\n" "$1" >> "$2"' sh "source = $SNIP $MARK" "$HCONF"
             say "Hyprland: added the autostart and $KEY to $HCONF (through $SNIP)"
         else
             say "Hyprland: to start it with the session, add to hyprland.conf:"

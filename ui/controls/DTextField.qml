@@ -28,6 +28,7 @@ Rectangle {
         font.pixelSize: 12
         clip: true
         selectByMouse: true
+        maximumLength: 2000
         text: root.text
 
         onEditingFinished: root.committed(input.text)

@@ -51,7 +51,12 @@ DwcWidget {
     readonly property bool playing: root.player ? root.player.isPlaying : false
     readonly property string title: root.fake ? "Track title" : (root.player ? root.player.trackTitle : "")
     readonly property string artist: root.fake ? "Artist" : (root.player ? root.player.trackArtist : "")
-    readonly property string artUrl: root.player ? root.player.trackArtUrl : ""
+    // Cover art is only read from local files. A player-supplied http(s) URL would
+    // make the shell fetch whatever address a track's metadata names.
+    readonly property string artUrl: {
+        var u = root.player ? String(root.player.trackArtUrl) : "";
+        return (u.indexOf("file:///") === 0 && u.length < 2048) ? u : "";
+    }
     readonly property real length: root.player && root.player.lengthSupported ? root.player.length : 0
     readonly property real pos: root.player && root.player.positionSupported ? root.player.position : 0
     readonly property real frac: root.length > 0 ? Math.min(1, root.pos / root.length) : 0

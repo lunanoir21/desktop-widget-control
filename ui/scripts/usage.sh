@@ -57,8 +57,16 @@ if [ "$mode" = api ]; then
         exit 0
     fi
     # The token goes in on stdin, not on the command line where `ps` would show it.
-    body=$(printf 'Authorization: Bearer %s\n' "$token" |
+    # The answer goes to a file so curl's own exit status is the one we test (in a pipe it
+    # would be head's), then is cut to the byte cap.
+    raw=$(mktemp) || { echo "@claude-api-failed"; exit 0; }
+    trap 'rm -f "$raw"' EXIT
+    if ! printf 'Authorization: Bearer %s\n' "$token" |
         curl -fsS --proto '=https' --max-time 10 --max-filesize 65536 -H @- -H 'anthropic-beta: oauth-2025-04-20' -H 'Accept: application/json' \
-            https://api.anthropic.com/api/oauth/usage 2>/dev/null | head -c 65536) || { echo "@claude-api-failed"; exit 0; }
+            -o "$raw" https://api.anthropic.com/api/oauth/usage 2>/dev/null; then
+        echo "@claude-api-failed"
+        exit 0
+    fi
+    body=$(head -c 65536 "$raw")
     printf '@claude-api %s\n%s\n' "$now" "$body"
 fi

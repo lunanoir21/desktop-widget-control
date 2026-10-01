@@ -6,6 +6,7 @@ Rectangle {
     id: root
 
     property string text: ""
+    property int maxLength: 20000
     signal committed(string text)
 
     implicitWidth: 170
@@ -34,6 +35,7 @@ Rectangle {
             wrapMode: TextEdit.Wrap
             selectByMouse: true
             text: root.text
+            onTextChanged: if (edit.length > root.maxLength) edit.remove(root.maxLength, edit.length)
             onActiveFocusChanged: if (!activeFocus) root.committed(edit.text)
             Keys.onEscapePressed: event => { edit.focus = false; event.accepted = true; }
         }

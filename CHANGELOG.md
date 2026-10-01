@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.1 — 2026-10-01
+
+- Outside text is always literal. `DText`, the one text control every widget uses, now sets `textFormat: Text.PlainText`, so a track title, artist or any other string that carries HTML (an `<img>` tag, say) is drawn as written instead of making the shell fetch a URL. A test fails if a QML file builds a bare `Text` or turns rich text on.
+- Cover art is read from local files only. A media player's `http(s)` cover URL is no longer fetched; players that save the cover to a file (most browsers, Spotify's local cache) still show it.
+- The weather request rounds the coordinates it got back from the geocoder to plain numbers before they go into the URL. (Thanks again to the marketplace reviewer.)
+- Hardening found by a full review of the same class of problem:
+  - The spectrum widget no longer writes its cava config to a fixed `/tmp` name (a pre-made symlink could have made it overwrite a file): it uses a private `mktemp` file and removes it once cava has read it.
+  - The layout file is capped at 2 MiB when read, the layout folder is `0700` and the file `0600` (it holds your notes and places), one option's text is capped at 20,000 characters, and a checklist builds at most 300 rows. Text boxes have length limits too.
+  - The Claude usage request reports a failed `curl` as failed (the old pipe reported the status of `head`).
+  - `install.sh`: `--ref` accepts only a plain branch or tag name, the Hyprland line is written without splicing paths into a shell string, and the archive download is checked before it is unpacked.
+
 ## 0.2.0 — 2026-10-01
 
 - New module: *AI limits*, the 5-hour and weekly limits of Claude and Codex as twin rings (outer = 5 hours, inner = week) or LED dots, red above a warning level you set. Codex is read from its own session logs; Claude from a capture of Claude Code's status line (`ui/scripts/claude-statusline.sh`, no network) or, as an opt-in, from the usage endpoint. Numbers that are old say how old; a window whose reset time has passed reads empty.

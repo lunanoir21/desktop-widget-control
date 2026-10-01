@@ -308,10 +308,11 @@ Item {
         id: cavaProc
         running: root.cavaAvailable && root.active("spectrum")
         command: ["sh", "-c",
-            'cfg="${XDG_RUNTIME_DIR:-/tmp}/desktop-widget-control-cava.conf"; '
+            // A private temp file (never a fixed name another user could pre-link), removed once cava has read it.
+            'cfg=$(mktemp "${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/dwc-cava.XXXXXX") || exit 1; '
             + 'printf "%s\n" "[general]" "bars = 24" "framerate = 30" "[output]" "method = raw" '
             + '"raw_target = /dev/stdout" "data_format = ascii" "ascii_max_range = 100" "channels = mono" '
-            + '"[smoothing]" "monstercat = 1" "waves = 0" > "$cfg"; exec cava -p "$cfg"']
+            + '"[smoothing]" "monstercat = 1" "waves = 0" > "$cfg"; (sleep 3; rm -f "$cfg") & exec cava -p "$cfg"']
         stdout: SplitParser {
             onRead: line => {
                 var parts = line.split(";");

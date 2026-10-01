@@ -59,6 +59,13 @@ class Installer(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertTrue(os.path.islink(self.path(".config/quickshell/desktop-widget-control")))
 
+    def test_a_ref_that_is_not_a_plain_name_is_refused(self):
+        for bad in ("--upload-pack=x", "a b", "x;y", "../x", "$(id)"):
+            r = self.run_install("--dry-run", "--ref", bad)
+            self.assertNotEqual(r.returncode, 0, bad)
+            self.assertIn("invalid --ref", r.stderr)
+        self.assertEqual(self.run_install("--dry-run", "--ref", "v0.2.1").returncode, 0)
+
     def test_dry_run_changes_nothing(self):
         r = self.run_install("--dry-run")
         self.assertEqual(r.returncode, 0, r.stderr)

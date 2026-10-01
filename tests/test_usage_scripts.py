@@ -81,6 +81,21 @@ class Scripts(unittest.TestCase):
         self.assertEqual(self.run_script(USAGE, "api").strip(), "@claude-api-expired")
         self.assertFalse(os.path.exists(os.path.join(self.home, "curl-called")))
 
+    def test_a_failed_request_is_reported_as_failed(self):
+        """curl's own exit status decides, not the status of whatever reads its output."""
+        d = os.path.join(self.home, ".claude")
+        os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, ".credentials.json"), "w") as f:
+            f.write('{"claudeAiOauth":{"accessToken":"secret-token","expiresAt":99999999999999}}')
+        fake = os.path.join(self.home, "fakebin")
+        os.makedirs(fake, exist_ok=True)
+        with open(os.path.join(fake, "curl"), "w") as f:
+            f.write("#!/bin/sh\nexit 22\n")
+        os.chmod(os.path.join(fake, "curl"), 0o755)
+        out = subprocess.run(["sh", USAGE, "api"], capture_output=True, text=True,
+                             env={"HOME": self.home, "PATH": fake + ":/usr/bin:/bin"}).stdout
+        self.assertEqual(out.strip(), "@claude-api-failed")
+
     def test_the_token_is_not_put_on_the_command_line(self):
         with open(USAGE) as f:
             text = f.read()

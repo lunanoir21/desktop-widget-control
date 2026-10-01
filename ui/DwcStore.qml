@@ -203,7 +203,7 @@ Item {
         if (!r)
             return;
         var cfg = Object.assign({}, r.cfg);
-        cfg[key] = value;
+        cfg[key] = typeof value === "string" ? value.slice(0, root.maxCfgString) : value;
         root.patch(id, { cfg: cfg });
     }
 
@@ -388,6 +388,7 @@ Item {
         var text = root.serialize();
         root.lastWritten = text;
         store.setText(text);
+        Quickshell.execDetached(["sh", "-c", 'sleep 1; chmod 600 "$1" 2>/dev/null', "sh", root.file]);
     }
 
     function parse(text) {
@@ -423,7 +424,11 @@ Item {
         root.order = order;
     }
 
-    Component.onCompleted: Quickshell.execDetached(["mkdir", "-p", root.dir])
+    // The layout holds notes and place names: keep the folder and file private to the user.
+    readonly property int maxFileBytes: 2097152
+    readonly property int maxCfgString: 20000      // one option's text (a note, a city): far more than anyone types
+
+    Component.onCompleted: Quickshell.execDetached(["sh", "-c", 'mkdir -p "$1" && chmod 700 "$1" && { [ ! -e "$2" ] || chmod 600 "$2"; }', "sh", root.dir, root.file])
 
     Timer {
         id: saveTimer
@@ -449,6 +454,8 @@ Item {
             if (text === root.lastWritten && root.loaded)
                 return;
             try {
+                if (text.length > root.maxFileBytes)
+                    throw new Error("file is larger than " + root.maxFileBytes + " bytes");
                 root.parse(text);
                 root.fresh = false;
             } catch (e) {

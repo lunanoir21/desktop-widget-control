@@ -17,6 +17,9 @@ Text {
         : face === "geo" ? DwcTheme.geo
         : DwcTheme.body
     font.italic: face === "serif"
+    // Always literal text. Track titles, session names and other outside strings
+    // must never be read as HTML (an <img> tag would make the shell fetch a URL).
+    textFormat: Text.PlainText
     elide: Text.ElideRight
     verticalAlignment: Text.AlignVCenter
 }
