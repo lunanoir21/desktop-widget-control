@@ -34,8 +34,23 @@ var categories = [
     { id: "media",  name: T("Media & tools", "Medya ve araçlar") }
 ];
 
+// The looks a widget can be drawn in. One is chosen for the whole desktop in
+// Settings and a widget may override it with its own "Look" appearance option.
+// Widgets read `family` (DwcWidget) and the shared controls and DText follow it,
+// so a module does not need a version of itself per look.
+var families = ["std", "mono", "dots", "term", "poster"];
+var familyChoices = [
+    { v: "std",    label: T("Standard", "Standart") },
+    { v: "mono",   label: T("Mono", "Mono") },
+    { v: "dots",   label: T("Dots", "Nokta") },
+    { v: "term",   label: T("Terminal", "Terminal") },
+    { v: "poster", label: T("Poster", "Poster") }
+];
+
 // Options every widget has; stored per widget under `st`.
 var styleOptions = [
+    { key: "family", type: "select", label: T("Look", "Görünüm"), def: "auto",
+      choices: [{ v: "auto", label: T("Follow desktop", "Masaüstünü izle") }].concat(familyChoices) },
     { key: "background", type: "toggle", label: T("Background", "Arka plan"), def: true },
     { key: "bgOpacity",  type: "range",  label: T("Opacity", "Opaklık"), def: 0.85, min: 0, max: 1, step: 0.05 },
     { key: "radius",     type: "range",  label: T("Radius", "Yarıçap"), def: 16, min: 0, max: 32, step: 1 },
@@ -281,6 +296,38 @@ var modules = [
                       "Claude Code'un token'ını okuyup 5 dakikada bir api.anthropic.com'a sorar. Kapalı: yalnızca status line yakalaması.") },
             color("color", "primary", T("Codex colour", "Codex rengi")),
             color("color2", "secondary", T("Claude colour", "Claude rengi"))
+        ]
+    },
+    {
+        type: "github-profile", category: "media", name: T("GitHub profile", "GitHub profili"),
+        sizes: ["M", "L", "W", "X", "B", "H"], size: "B", interactive: true, source: "widgets/GithubProfile.qml",
+        opts: [
+            { key: "user", type: "text", label: T("GitHub name", "GitHub adı"), def: "",
+              hint: T("A public profile or organisation, read from github.com without logging in",
+                      "Herkese açık bir profil ya da kuruluş; giriş yapmadan github.com'dan okunur") },
+            { key: "graph", type: "toggle", label: T("Contribution graph", "Katkı grafiği"), def: true },
+            { key: "languages", type: "toggle", label: T("Languages", "Diller"), def: true },
+            { key: "repoSort", type: "select", label: T("Repositories", "Depolar"), def: "stars", choices: [
+                { v: "stars",  label: T("Most starred", "En çok yıldızlı") },
+                { v: "pushed", label: T("Recently pushed", "Son güncellenen") }
+            ] },
+            { key: "forks", type: "toggle", label: T("Count forks", "Fork'ları say"), def: false },
+            { key: "avatar", type: "toggle", label: T("Picture", "Fotoğraf"), def: true,
+              hint: T("Downloads the avatar once a day into the cache folder", "Avatarı günde bir kez önbellek klasörüne indirir") },
+            { key: "login", type: "toggle", label: T("Use gh login", "gh girişini kullan"), def: false,
+              hint: T("Sends the token of the GitHub CLI (gh auth login) to api.github.com: 5,000 reads an hour and your private contributions in the calendar. Off: no token is read",
+                      "GitHub CLI'nin (gh auth login) token'ını api.github.com'a gönderir: saatte 5.000 okuma ve takvimde özel katkıların. Kapalıyken token okunmaz") },
+            { key: "refresh", type: "select", label: T("Refresh", "Yenileme"), def: 30, choices: [
+                { v: 15, label: T("15 min", "15 dk") },
+                { v: 30, label: T("30 min", "30 dk") },
+                { v: 60, label: T("1 hour", "1 saat") },
+                { v: 1440, label: T("Daily", "Günlük") },
+                { v: 10080, label: T("Weekly", "Haftalık") }
+            ],
+              hint: T("The refresh button on the card (it shows when the pointer is over it) reads again at once",
+                      "Kartın üzerindeki yenile düğmesi (imleç üzerindeyken görünür) hemen yeniden okur") },
+            color("color", "primary", T("Graph", "Grafik")),
+            color("color2", "secondary", T("Stars", "Yıldız"))
         ]
     },
     {

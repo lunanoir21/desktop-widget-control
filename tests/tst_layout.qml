@@ -189,4 +189,14 @@ TestCase {
         compare(Layout.nearestPreset(["M", "W", "X"], 19, 4), "X");
         compare(Layout.nearestPreset(["M", "W", "X"], 12, 4), "W");
     }
+
+    function test_the_big_presets() {
+        compare(Layout.preset("B").w, 12);
+        compare(Layout.preset("B").h, 8);
+        compare(Layout.preset("H").w, 12);
+        compare(Layout.preset("H").h, 10);
+        compare(Layout.nearestPreset(["M", "L", "B", "H"], 12, 9), "B");
+        compare(Layout.nearestPreset(["M", "L", "B", "H"], 12, 10), "H");
+        verify(Layout.presetOrder.indexOf("B") > 0 && Layout.presetOrder.indexOf("H") > 0);
+    }
 }

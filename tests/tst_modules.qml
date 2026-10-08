@@ -148,6 +148,35 @@ TestCase {
             verify(d[Modules.styleOptions[i].key] !== undefined);
     }
 
+    // The look every widget has: "auto" follows the desktop, the rest are the
+    // families. It is an appearance option, not a per-module one.
+    function test_the_family_option() {
+        var family = Modules.styleOptions.filter(function (o) { return o.key === "family"; })[0];
+        compare(family.type, "select");
+        compare(family.def, "auto");
+        compare(Modules.families.join(","), "std,mono,dots,term,poster");
+        compare(family.choices.map(function (c) { return c.v; }).join(","), ["auto"].concat(Modules.families).join(","));
+        for (var i = 0; i < family.choices.length; i++) {
+            var l = family.choices[i].label;
+            verify(l.en && l.tr, "family choice " + family.choices[i].v + ": label needs en and tr");
+        }
+        // The store and `dwc look` take ids from familyChoices, so the two lists must not drift.
+        compare(Modules.familyChoices.map(function (c) { return c.v; }).join(","), Modules.families.join(","));
+        for (var f = 0; f < Modules.familyChoices.length; f++) {
+            var cl = Modules.familyChoices[f].label;
+            verify(cl.en && cl.tr, "family " + Modules.familyChoices[f].v + ": label needs en and tr");
+        }
+    }
+
+    // "auto" is what gets stored, so a widget that never chose a look follows
+    // whatever the desktop is set to.
+    function test_the_family_default_follows_the_desktop() {
+        compare(Modules.styleDefaults("clock-led").family, "auto");
+        compare(Modules.styleDefaults().family, "auto");
+        compare(Modules.mergeStyle({ family: "term" }).family, "term");
+        compare(Modules.mergeStyle({ family: "term", nope: 1 }).nope, undefined);
+    }
+
     function test_mergeCfg_fills_and_filters() {
         var c = Modules.mergeCfg("clock-led", { seconds: true, bogus: 1 });
         compare(c.seconds, true);
@@ -178,6 +207,6 @@ TestCase {
         compare(Modules.byType("nope"), null);
         compare(Modules.inCategory("clock").length, 6);
         compare(Modules.inCategory("system").length, 5);
-        compare(Modules.inCategory("media").length, 6);
+        compare(Modules.inCategory("media").length, 7);
     }
 }

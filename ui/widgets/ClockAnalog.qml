@@ -26,20 +26,32 @@ DwcWidget {
         x: root.showDate ? 0 : (root.width - width) / 2
         y: (root.height - height) / 2
 
+        // mono and terminal draw the dial's edge (a circle, a square); the others leave it open
+        Rectangle {
+            visible: root.family === "mono" || root.family === "term"
+            anchors.fill: parent
+            radius: root.family === "term" ? 0 : width / 2
+            color: "transparent"
+            border.width: 1
+            border.color: DwcTheme.alpha(DwcTheme.fg, root.family === "mono" ? 0.3 : 0.25)
+        }
+
         Repeater {
             model: root.ticks === "none" ? 0 : 12
             delegate: Item {
                 required property int index
                 readonly property bool major: index % 3 === 0
-                visible: root.ticks === "all" || major
+                // mono and poster keep only the quarters
+                visible: (root.ticks === "all" && root.family !== "mono" && root.family !== "poster") || major
                 anchors.fill: parent
                 rotation: index * 30
                 Rectangle {
                     anchors.horizontalCenter: parent.horizontalCenter
                     y: 2
-                    width: major ? 3 : 2
-                    height: major ? face.height * 0.08 : face.height * 0.045
-                    radius: 1
+                    // the dots look turns each tick into a dot
+                    width: root.family === "dots" ? (major ? 5 : 3) : (major ? 3 : 2)
+                    height: root.family === "dots" ? width : (major ? face.height * 0.08 : face.height * 0.045)
+                    radius: root.family === "std" ? 1 : (root.family === "dots" ? width / 2 : 0)
                     color: major ? DwcTheme.fg : DwcTheme.muted
                 }
             }
@@ -54,8 +66,8 @@ DwcWidget {
                 y: face.height / 2 - height
                 width: Math.max(3, face.height * 0.035)
                 height: face.height * 0.26
-                radius: width / 2
-                color: root.tone("color")
+                radius: root.family === "std" || root.family === "dots" ? width / 2 : 0
+                color: root.family === "mono" ? DwcTheme.fg : root.tone("color")
             }
         }
         // minute
@@ -67,8 +79,8 @@ DwcWidget {
                 y: face.height / 2 - height
                 width: Math.max(2, face.height * 0.025)
                 height: face.height * 0.38
-                radius: width / 2
-                color: root.tone("color")
+                radius: root.family === "std" || root.family === "dots" ? width / 2 : 0
+                color: root.family === "mono" ? DwcTheme.fg : root.tone("color")
             }
         }
         // second

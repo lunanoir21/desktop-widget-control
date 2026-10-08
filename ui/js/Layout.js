@@ -9,9 +9,11 @@ var presets = {
     M: { w: 8,  h: 4 },
     L: { w: 8,  h: 8 },
     W: { w: 12, h: 4 },
-    X: { w: 20, h: 4 }        // extra wide: a strip across the middle of the screen
+    X: { w: 20, h: 4 },       // extra wide: a strip across the middle of the screen
+    B: { w: 12, h: 8 },       // big: a wide card with room for large type
+    H: { w: 12, h: 10 }       // huge: the same, taller
 };
-var presetOrder = ["S", "M", "L", "W", "X"];
+var presetOrder = ["S", "M", "L", "W", "X", "B", "H"];
 
 function preset(key) {
     return presets[key] || presets.M;

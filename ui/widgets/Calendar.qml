@@ -136,7 +136,19 @@ DwcWidget {
                     anchors.centerIn: parent
                     width: Math.min(parent.width, parent.height) - 2
                     height: width
-                    radius: width / 2
+                    // a circle only reads as a marker in the looks that round everything
+                    radius: root.family === "term" || root.family === "mono" ? 0 : width / 2
+                    // mono and poster leave the number to carry the accent themselves
+                    color: root.family === "mono" || root.family === "poster" ? "transparent" : root.tone("color")
+                    border.width: root.family === "mono" ? 1 : 0
+                    border.color: DwcTheme.alpha(DwcTheme.fg, 0.3)
+                }
+                // poster puts a rule under the number instead of a fill behind it
+                Rectangle {
+                    visible: root.family === "poster" && modelData.isToday
+                    anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: parent.height * 0.1 }
+                    width: Math.min(parent.width, parent.height) * 0.45
+                    height: 2
                     color: root.tone("color")
                 }
                 DText {
@@ -144,7 +156,11 @@ DwcWidget {
                     horizontalAlignment: Text.AlignHCenter
                     face: "mono"
                     font.pixelSize: Math.max(10, Math.min(14, Math.round(root.ch * 0.46)))
-                    color: modelData.isToday ? DwcTheme.onAcc : (modelData.inMonth ? DwcTheme.fg : DwcTheme.faint)
+                    // in the looks that drop the fill the number carries the colour itself
+                    color: !modelData.isToday ? (modelData.inMonth ? DwcTheme.fg : DwcTheme.faint)
+                        : root.family === "poster" ? root.tone("color")
+                        : root.family === "mono" ? DwcTheme.fg
+                        : DwcTheme.onAcc
                     text: modelData.n
                 }
                 // Week number at the start of each row.

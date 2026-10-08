@@ -145,6 +145,14 @@ Scope {
             }
         }
 
+        // The look of every widget: std, mono, dots, term or poster.
+        function look(name: string): string {
+            if (Modules.families.indexOf(name) < 0)
+                return "unknown look (try: " + Modules.families.join(", ") + ")";
+            DwcStore.setFamily(name);
+            return "ok";
+        }
+
         // auto, en or tr.
         function language(l: string): void {
             DwcStore.setLanguage(l);

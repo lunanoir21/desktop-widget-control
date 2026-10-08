@@ -16,7 +16,7 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PRESETS = {"S": (4, 4), "M": (8, 4), "L": (8, 8), "W": (12, 4), "X": (20, 4)}
+PRESETS = {"S": (4, 4), "M": (8, 4), "L": (8, 8), "W": (12, 4), "X": (20, 4), "B": (12, 8), "H": (12, 10)}
 
 
 def modules():
@@ -24,7 +24,7 @@ def modules():
     src = open(os.path.join(ROOT, "ui/js/Modules.js")).read()
     out = []
     for m in re.finditer(r'type:\s*"([a-z-]+)",\s*category.*?sizes:\s*\[([^\]]*)\]', src, re.S):
-        out.append((m.group(1), re.findall(r'"([SMLWX])"', m.group(2))))
+        out.append((m.group(1), re.findall(r'"([SMLWXBH])"', m.group(2))))
     return out
 
 
@@ -44,7 +44,7 @@ def main():
             pages.append(cur)
             cur, x, y, rowh = [], 0, 0, 0
         cur.append({"id": f"{t}-{s}", "type": t, "size": s, "x": x, "y": y, "screen": "", "locked": False,
-                    "cfg": {"city": "Istanbul"} if t == "weather" else {}, "st": {}})
+                    "cfg": {"city": "Istanbul"} if t == "weather" else {"user": "octocat"} if t == "github-profile" else {}, "st": {}})
         x += w
         rowh = max(rowh, h)
     pages.append(cur)

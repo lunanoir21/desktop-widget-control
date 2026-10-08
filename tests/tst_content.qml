@@ -44,6 +44,24 @@ TestCase {
         compare(Themes.ids().length, Themes.list.length);
     }
 
+    // Every theme is the same nine colours plus a name, an id and a dark flag,
+    // whatever its colours are; the count keeps a theme from being dropped.
+    function test_the_themes_are_complete() {
+        var fields = ["card", "alt", "fg", "sub", "muted", "acc", "onAcc", "acc2", "track"];
+        var seen = {};
+        for (var i = 0; i < Themes.list.length; i++) {
+            var t = Themes.list[i];
+            verify(/^[a-z][a-z0-9]*$/.test(t.id), "bad theme id " + t.id);
+            verify(!seen[t.id], "duplicate theme " + t.id);
+            seen[t.id] = true;
+            verify(t.name !== "", t.id + ": no name");
+            compare(typeof t.dark, "boolean");
+            for (var f = 0; f < fields.length; f++)
+                verify(/^#[0-9a-f]{6}$/i.test(t[fields[f]]), t.id + "." + fields[f]);
+        }
+        compare(Themes.list.length, 23);
+    }
+
     // Readable text on every theme: primary text on the card and the label on
     // the accent each need at least 4.5:1 (WCAG AA for normal text).
     function lum(hex) {

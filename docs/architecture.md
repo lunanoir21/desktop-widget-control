@@ -95,7 +95,7 @@ The editor is a separate overlay surface with exclusive keyboard focus on the pr
 | `disk` | `df` | 60 s |
 | `spectrum` | `cava` (raw ascii, 24 bands, 30 fps), only while a media widget with the visualizer is playing; skipped if cava is missing | 33 ms |
 
-The media player reads Quickshell's MPRIS service directly; the weather widget and the world clock run `curl` and `date` themselves (arguments are passed as an argv, never spliced into a shell string).
+The media player reads Quickshell's MPRIS service directly; the weather widget and the world clock run `curl` and `date` themselves (arguments are passed as an argv, never spliced into a shell string). The GitHub profile widget runs `ui/scripts/github.sh`, which reads three public pages with bounded `curl` calls and prints only the lines the widget parses (`ui/js/Github.js`); the name is validated before it reaches a URL.
 
 ## Debugging
 

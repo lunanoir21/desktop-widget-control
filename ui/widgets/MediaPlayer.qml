@@ -1,9 +1,11 @@
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Shapes
+import Quickshell.Io
 import Quickshell.Services.Mpris
 import ".."
 import "../controls"
+import "../js/Cover.js" as Cover
 
 // Whatever MPRIS player is running (Spotify, mpv, a browser tab…): cover,
 // title, artist, progress and transport buttons. Small = cover with a title
@@ -51,11 +53,52 @@ DwcWidget {
     readonly property bool playing: root.player ? root.player.isPlaying : false
     readonly property string title: root.fake ? "Track title" : (root.player ? root.player.trackTitle : "")
     readonly property string artist: root.fake ? "Artist" : (root.player ? root.player.trackArtist : "")
-    // Cover art is only read from local files. A player-supplied http(s) URL would
-    // make the shell fetch whatever address a track's metadata names.
-    readonly property string artUrl: {
-        var u = root.player ? String(root.player.trackArtUrl) : "";
-        return (u.indexOf("file:///") === 0 && u.length < 2048) ? u : "";
+    // Cover art is read from local files. A player-supplied http(s) URL would make the shell
+    // fetch whatever address a track's metadata names, so only the few image hosts the common
+    // players use are allowed (js/Cover.js), and they are downloaded by scripts/cover.sh into
+    // the cache; the widget then shows that local file.
+    readonly property string rawArt: root.player ? String(root.player.trackArtUrl) : ""
+    readonly property bool localArt: root.rawArt.indexOf("file:///") === 0 && root.rawArt.length < 2048
+    readonly property bool remoteArt: !root.localArt && Cover.allowed(root.rawArt)
+    property string fetchedFor: ""        // the address the file below was downloaded from
+    property string fetchedFile: ""
+    property string asking: ""
+    readonly property string coverScript: Qt.resolvedUrl("../scripts/cover.sh").toString().replace("file://", "")
+    readonly property string artUrl: root.localArt ? root.rawArt
+        : (root.remoteArt && root.fetchedFor === root.rawArt && root.fetchedFile !== "" ? "file://" + root.fetchedFile : "")
+
+    // Only while a cover is wanted and something is on screen; once per track.
+    function fetchCover() {
+        if (root.preview || !root.remoteArt || !(root.showArt || root.mode === "s") || DwcData.idle || coverProc.running || root.fetchedFor === root.rawArt)
+            return;
+        root.asking = root.rawArt;
+        coverProc.command = ["sh", root.coverScript, root.rawArt];
+        coverProc.running = true;
+    }
+    onRawArtChanged: root.fetchCover()
+    onRemoteArtChanged: root.fetchCover()
+    onShowArtChanged: root.fetchCover()
+    Component.onCompleted: root.fetchCover()
+
+    Process {
+        id: coverProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var p = text.trim();
+                // the script prints one absolute path, or nothing
+                if (/^\/[^\n\0]+$/.test(p)) {
+                    root.fetchedFile = p;
+                    root.fetchedFor = root.asking;
+                } else {
+                    // refused or failed: remember the address so it is not asked for again until the track changes
+                    root.fetchedFile = "";
+                    root.fetchedFor = root.asking;
+                }
+                // the track changed while this ran
+                if (root.asking !== root.rawArt)
+                    root.fetchCover();
+            }
+        }
     }
     readonly property real length: root.player && root.player.lengthSupported ? root.player.length : 0
     readonly property real pos: root.player && root.player.positionSupported ? root.player.position : 0
@@ -114,7 +157,8 @@ DwcWidget {
         Rectangle {
             id: artMask
             anchors.fill: parent
-            radius: 10
+            // soft corners; the dots look rounds a square cover into a disc; mono, terminal and poster are sharp
+            radius: root.family === "std" ? 10 : (root.family === "dots" ? (width === height ? width / 2 : 14) : 0)
             layer.enabled: true
             visible: false
         }
@@ -126,6 +170,7 @@ DwcWidget {
             layer.effect: MultiEffect {
                 maskEnabled: true
                 maskSource: artMask
+                saturation: root.family === "mono" ? -1 : 0
             }
 
             Rectangle {

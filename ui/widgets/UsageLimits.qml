@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Shapes
 import ".."
 import "../controls"
 import "../js/Usage.js" as Usage
@@ -94,26 +93,17 @@ DwcWidget {
                                 { r: (rings.width - panel.stroke) / 2, w: panel.modelData.five, dim: 1 },
                                 { r: (rings.width - panel.stroke) / 2 - panel.stroke * 1.3, w: panel.modelData.week, dim: 0.55 }
                             ]
-                            delegate: Shape {
+                            delegate: DRing {
                                 required property var modelData
-                                anchors.fill: parent
-                                preferredRendererType: Shape.CurveRenderer
-                                ShapePath {
-                                    strokeColor: DwcTheme.track
-                                    strokeWidth: panel.stroke * (modelData.dim === 1 ? 1 : 0.78)
-                                    fillColor: "transparent"
-                                    PathAngleArc { centerX: rings.width / 2; centerY: rings.width / 2; radiusX: modelData.r; radiusY: modelData.r; startAngle: -90; sweepAngle: 359.9 }
-                                }
-                                ShapePath {
-                                    strokeColor: modelData.w ? Qt.alpha(root.fillColor(panel.modelData, modelData.w), modelData.dim) : "transparent"
-                                    strokeWidth: panel.stroke * (modelData.dim === 1 ? 1 : 0.78)
-                                    fillColor: "transparent"
-                                    capStyle: ShapePath.RoundCap
-                                    PathAngleArc {
-                                        centerX: rings.width / 2; centerY: rings.width / 2; radiusX: modelData.r; radiusY: modelData.r
-                                        startAngle: -90; sweepAngle: modelData.w ? Math.max(0.1, 3.599 * modelData.w.pct) : 0
-                                    }
-                                }
+                                readonly property real sw: panel.stroke * (modelData.dim === 1 ? 1 : 0.78)
+                                // the radius is the middle of the stroke, as the old hand-drawn rings had it
+                                width: modelData.r * 2 + sw
+                                height: width
+                                anchors.centerIn: parent
+                                stroke: sw
+                                value: modelData.w ? modelData.w.pct / 100 : 0
+                                color: modelData.w ? Qt.alpha(root.fillColor(panel.modelData, modelData.w), modelData.dim) : "transparent"
+                                keepColor: modelData.w ? Usage.level(modelData.w.pct, root.warnAt) !== "ok" : false
                             }
                         }
 

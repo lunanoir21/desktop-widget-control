@@ -11,6 +11,9 @@ Item {
     property var cfg: ({})
     property string sizeKey: "M"
     property bool preview: false          // a library thumbnail: no real interaction
+    // The look this widget is drawn in (Modules.families): "std", "mono", "dots", "term" or "poster".
+    // DText and the shared controls read it from here, so most widgets need nothing else.
+    property string family: "std"
     // A look that needs its own card shape (the media pill) sets this; -1 keeps the Radius option.
     property real cardRadius: -1
 

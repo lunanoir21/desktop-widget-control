@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Shapes
 import "../js/Logos.js" as Logos
 
-// A service mark from js/Logos.js ("claude", "openai"), filled, on a 24×24 grid.
+// A service mark from js/Logos.js ("claude", "openai", "github"), filled, on a 24×24 grid.
 Item {
     id: root
 

@@ -87,31 +87,11 @@ DwcWidget {
         x: root.small ? (root.width - width) / 2 : 0
         y: (root.height - height) / 2
 
-        Shape {
+        DRing {
             anchors.fill: parent
-            preferredRendererType: Shape.CurveRenderer
-            ShapePath {
-                strokeColor: DwcTheme.track
-                strokeWidth: root.stroke
-                fillColor: "transparent"
-                capStyle: ShapePath.RoundCap
-                PathAngleArc {
-                    centerX: ring.width / 2; centerY: ring.height / 2
-                    radiusX: (ring.width - root.stroke) / 2; radiusY: (ring.height - root.stroke) / 2
-                    startAngle: -90; sweepAngle: 359.9
-                }
-            }
-            ShapePath {
-                strokeColor: root.ink
-                strokeWidth: root.stroke
-                fillColor: "transparent"
-                capStyle: ShapePath.RoundCap
-                PathAngleArc {
-                    centerX: ring.width / 2; centerY: ring.height / 2
-                    radiusX: (ring.width - root.stroke) / 2; radiusY: (ring.height - root.stroke) / 2
-                    startAngle: -90; sweepAngle: Math.max(0.1, 359.9 * root.frac)
-                }
-            }
+            value: root.frac
+            color: root.ink
+            stroke: root.stroke
         }
 
         Column {

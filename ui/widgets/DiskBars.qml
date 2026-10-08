@@ -65,17 +65,13 @@ DwcWidget {
                     text: root.small ? Math.round(parent.frac * 100) + "%"
                         : DwcData.bytes(modelData.used, 0) + " / " + DwcData.bytes(modelData.size, 0)
                 }
-                Rectangle {
+                DBar {
                     anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
                     height: 6
-                    radius: 3
-                    color: DwcTheme.track
-                    Rectangle {
-                        width: Math.max(6, parent.width * parent.parent.frac)
-                        height: parent.height
-                        radius: 3
-                        color: parent.parent.frac > root.warn ? DwcTheme.danger : root.tone("color")
-                    }
+                    value: parent.frac
+                    color: parent.frac > root.warn ? DwcTheme.danger : root.tone("color")
+                    // a warning keeps its colour in the mono look too
+                    keepColor: parent.frac > root.warn
                 }
             }
         }

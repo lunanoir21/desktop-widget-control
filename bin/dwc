@@ -29,10 +29,12 @@ dwc remove ID
 dwc select ID                 select a widget in the editor
 dwc move ID X Y               move a widget to grid cell X,Y
 dwc center ID [h|v|both]      put a widget in the middle of the screen
-dwc size ID S|M|L|W|X         change a widget's size
+dwc size ID S|M|L|W|X|B|H     change a widget's size
 dwc set ID KEY JSON           change an option:  dwc set clock-led-1 seconds true
 dwc style ID KEY JSON         change an appearance option:  dwc style media-1 radius 24
-dwc theme NAME|cycle          moss umbra black graphite paper sand gold amber crimson
+dwc theme NAME|cycle          moss umbra black graphite paper sand gold amber crimson ocean violet mint rose sunset
+                              dusk sky matcha ink chalk phosphor termamber blueprint sepia
+dwc look NAME                 std mono dots term poster (the look of every widget)
 dwc language auto|en|tr
 dwc list                      the layout as JSON
 dwc reset                     back to the first-run layout

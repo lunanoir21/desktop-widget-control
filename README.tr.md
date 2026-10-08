@@ -25,11 +25,11 @@ Widget'ları masaüstü katmanına çizer: duvar kağıdının üstünde, tüm p
 <img src="docs/screenshots/moss/editor.webp" width="880" alt="Düzenleyici: solda widget kütüphanesi, ortada ızgaralı masaüstü, sağda seçili widget'ın paneli">
 </div>
 
-- **17 modül**, her birinin birkaç boyutu var: altı saat, beş sistem monitörü, müzik oynatıcı, takvim, hava durumu, pomodoro, yapılacaklar listesi ve Claude / Codex kullanım limitleri.
+- **18 modül**, her birinin birkaç boyutu var: altı saat, beş sistem monitörü, müzik oynatıcı, takvim, hava durumu, pomodoro, yapılacaklar listesi, Claude / Codex kullanım limitleri ve GitHub profili.
 - **Gerçek bir düzenleyici.** Canlı önizlemeli kütüphane, sürükle-bırak, hücreye yapışma, hazır boyutlarla yeniden boyutlandırma, her modülün seçeneklerinden otomatik üretilen özellik paneli, kopyalama, kilitleme, silme, ok tuşlarıyla kaydırma.
 - **Stiller.** Birçok modülün panelde bir *Stil* seçeneği var; bütün görünümü değiştirir, diğer seçenekler çalışmaya devam eder.
 - **Her şey bir seçenek.** Renkler temayı izler ya da elle seçilir; arka plan, opaklık, yarıçap, dolgu, gölge ve çerçeve widget başınadır.
-- **Dokuz tema**, Türkçe ve İngilizce.
+- **23 tema** (altısı monokrom), Türkçe ve İngilizce.
 - **Ucuz.** Veri kaynakları yalnızca bir widget'a gerektiğinde çalışır ve widget'lar arasında paylaşılır. Bkz. [maliyeti](#maliyeti).
 - **Betiklenebilir.** Düzenleyicinin yaptığı her şey bir IPC çağrısıdır; düzen tek bir JSON dosyasıdır, elle düzenlersen anında uygulanır.
 - **Bağımsız.** Shell'inin geri kalanından hiçbir şey istemez. Fontlar pakette.
@@ -38,7 +38,7 @@ Widget'ları masaüstü katmanına çizer: duvar kağıdının üstünde, tüm p
 
 - [Quickshell](https://quickshell.org), 0.3.1 (Qt 6.11) ile geliştirildi ve denendi; Wayland desteğiyle derlenmiş olmalı (varsayılan).
 - `wlr-layer-shell` destekleyen bir compositor: Hyprland, Sway, river, niri, labwc ve benzeri wlroots tarzı compositor'ların çoğu. (GNOME'un Mutter'ı desteklemez.)
-- `curl`, yalnızca hava durumu widget'ı için.
+- `curl`, yalnızca hava durumu ve GitHub profili widget'ları için.
 - `notify-send`, yalnızca pomodoro bildirim göndersin istersen.
 - [`cava`](https://github.com/karlstav/cava), yalnızca müzik oynatıcının ses görselleştiricisi için. Yoksa seçenek bir şey yapmaz ve fazladan hiçbir şey çalışmaz.
 
@@ -116,13 +116,14 @@ Zaten kendi Quickshell shell'ini çalıştırıyorsan ikinci bir süreç gerekme
 | **Ağ** | S M W | orta çizginin üstünde indirme, altında yükleme, ortak ölçekte (ya da iki düz çizgi) |
 | **Sıcaklık** | S M | CPU sensörü için yarım daire gösterge |
 | **Müzik oynatıcı** | S M L W X | herhangi bir MPRIS oynatıcı (Spotify, mpv, tarayıcı…): kapak, başlık, ilerleme, düğmeler ve ilerleme çubuğuna işlenmiş (ya da kartın arkasından yumuşakça yükselen) canlı cava spektrumu; *Geniş şerit* stili her şeyi tek satıra dizer, çubuğa tıklayınca sarar |
+| **GitHub profili** | M L W X | herkese açık bir GitHub profili: fotoğraf, takipçi, yıldız, serinle birlikte katkı takvimi, kullandığın diller ve en iyi depolarının listesi ([GitHub profili](#github-profili)) |
 | **Takvim** | M L | ay ızgarası; orta boyutta yanında bugünün tarihi |
 | **Hava durumu** | S M L | Open-Meteo'dan anlık durum ve tahmin; ülke ve şehir aranabilir listeden seçilir |
 | **YZ limitleri** | M W | Claude ve Codex'in 5 saatlik ve haftalık limitleri; çift halka ya da LED nokta ([YZ limitleri](#yz-limitleri)) |
 | **Pomodoro** | S M | odak / mola sayacı; başlatmak için halkaya tıkla |
 | **Notlar** | M L | masaüstünde işaretleyebileceğin bir liste |
 
-Boyutlar ızgara hazırlarıdır: S 4×4 hücre, M 8×4, L 8×8, W 12×4, bir de ekranın ortasından geçen şerit için X 20×4 (bir hücre varsayılan olarak 40 px, Ayarlar'dan değişir). Özellik panelindeki *Ortala* düğmeleri seçili widget'ı ekranın ortasına, yatayda ya da dikeyde alır. Her modülün seçenekleri [`ui/js/Modules.js`](ui/js/Modules.js) içinde listelenir; özellik paneli de aynı listeden üretilir.
+Boyutlar ızgara hazırlarıdır: S 4×4 hücre, M 8×4, L 8×8, W 12×4, ekranın ortasından geçen şerit için X 20×4, bir de büyük yazıya yer açan B 12×8 ve H 12×10 (GitHub profili bunları kullanır) (bir hücre varsayılan olarak 40 px, Ayarlar'dan değişir). Özellik panelindeki *Ortala* düğmeleri seçili widget'ı ekranın ortasına, yatayda ya da dikeyde alır. Her modülün seçenekleri [`ui/js/Modules.js`](ui/js/Modules.js) içinde listelenir; özellik paneli de aynı listeden üretilir.
 
 ## YZ limitleri
 
@@ -134,9 +135,27 @@ Boyutlar ızgara hazırlarıdır: S 4×4 hücre, M 8×4, L 8×8, W 12×4, bir de
 
 Claude ve OpenAI logoları ilgili sahiplerinin ticari markasıdır; proje iki şirketle de bağlantılı değildir.
 
+## GitHub profili
+
+*GitHub profili* widget'ı herkese açık bir profili ya da kuruluşu gösterir: fotoğraf, sayılar (takipçi, depo, yıldız, fork), yıllık toplamla katkı takvimi, mevcut ve en uzun serin, kullandığın dillerin çubuğu ve en iyi depoların. Adı inspector'a yaz; giriş yapılacak bir şey yok.
+
+- Yalnızca herkese açık sayfaları okur: profil ve depolar `api.github.com`'dan, takvim `github.com/users/AD/contributions` adresinden. Her okuma HTTPS'tir, süre ve boyut sınırı vardır ve widget'ın ihtiyacı olan satırlara indirilir (`ui/scripts/github.sh`). 15 ya da 30 dakikada bir, saatlik, günlük ya da haftalık (*Yenileme* seçeneği) ve yalnızca widget görünürken yeniden sorar. İmleci kartın üzerine getirince, verinin ne kadar eski olduğunu gösteren küçük bir düğme çıkar; basınca hemen yeniden okur. GitHub, girişsiz API'de adres başına saatte 60 okumaya izin verir; her yenilemede ikisi kullanılır, GitHub yavaşlamanı isterse görünen sayılar kalır.
+- *gh girişini kullan* (varsayılan kapalı), [GitHub CLI](https://cli.github.com)'nin token'ını (bir kez `gh auth login`; widget `gh auth token` çalıştırır) yalnızca `api.github.com`'a gönderir. Saatlik sınırı 60'tan 5.000 okumaya çıkarır ve takvimi GraphQL'den çizer; bu, profilinin gösterdiği özel katkıları da sayar. Token standart girdiden gider, hiçbir zaman komut satırına yazılmaz ve seçenek kapalıyken hiç okunmaz. `gh` yoksa ya da giriş yapılmamışsa kartın üzerindeki hap bunu söyler ve herkese açık sayfalar kullanılır; GitHub'ın reddettiği token bırakılır.
+- Fotoğraf günde bir kez `~/.cache/desktop-widget-control/` içine kaydedilir. *Fotoğraf* seçeneğini kapatırsan dosya olarak hiçbir şey indirilmez.
+- Diller depo başına sayılır (GitHub'ın API'si bir deponun ana dilini verir, bayt değil) ve *Fork'ları say* açılmadıkça fork'lar dışarıda kalır. Özel depolar ve özel katkılar girişsiz görünmez, bu yüzden sayılmaz.
+- Boyutlar: M profili takvimin üstüne, W yanına koyar, L en iyi depolarla her şeyi alt alta dizer, X bir depo sütunu ekler.
+
+GitHub logosu GitHub, Inc.'in ticari markasıdır; proje onunla bağlantılı değildir.
+
+## Görünümler
+
+Beş görünüm var: *Standart* her zamanki görünüm; *Mono* her şeyi tek renkte, ince çizgilerle ve mono yazı tipiyle çizer; *Nokta* nokta-matris rakamlar, noktalı halkalar, çubuklar ve grafikler; *Terminal* mono yazı tipi, blok çubuklar, basamaklı grafikler; *Poster* ise büyük ve sıkı rakamlar, ince çizgiler ve ince bir alan grafiği. Her widget'ın hepsi vardır ve hiçbiri ayrı bir widget değildir.
+
+Özellik panelinin *Ayarlar* sekmesindeki *Görünüm* açılır listesi görünümü masaüstünün tamamında birden değiştirir; `dwc look mono` da aynı işi terminalden ya da bir tuş atamasıyla yapar. Ayrıca her widget'ın kendi *Görünüm* seçeneği vardır; sen söylemedikçe *Masaüstünü izle* durumundadır, yani tek bir saat standart kalırken gerisi terminale geçebilir.
+
 ## Temalar
 
-`moss` (varsayılan), `umbra`, `black`, `graphite`, `paper`, `sand`, `gold`, `amber`, `crimson`. Bir tema [`ui/js/Themes.js`](ui/js/Themes.js) içinde dokuz renktir; testler, kart üzerindeki ve vurgu üzerindeki yazının her temada okunaklı kaldığını denetler (WCAG AA). Widget içindeki renk seçenekleri temayı izleyen *token*'lar (birincil, ikincil, yazı, soluk) ya da izlemeyen sabit renklerdir.
+`moss` (varsayılan), `umbra`, `black`, `graphite`, `paper`, `sand`, `gold`, `amber`, `crimson`, ardından `ocean`, `violet`, `mint`, `rose`, `sunset`, `dusk`, `sky`, `matcha` (yeni renkler) ve monokrom `ink`, `chalk`, `phosphor`, `termamber`, `blueprint`, `sepia`. Bir tema [`ui/js/Themes.js`](ui/js/Themes.js) içinde dokuz renk alanıdır; testler, kart üzerindeki ve vurgu üzerindeki yazının her temada okunaklı kaldığını denetler (WCAG AA). Widget içindeki renk seçenekleri temayı izleyen *token*'lar (birincil, ikincil, yazı, soluk) ya da izlemeyen sabit renklerdir.
 
 ## Betikleme
 
@@ -149,6 +168,7 @@ dwc set clock-led-1 seconds true         # bir seçenek (değer JSON'dur)
 dwc style media-1 radius 24              # bir görünüm seçeneği
 dwc move cpu-graph-1 4 6                 # (4, 6) ızgara hücresine
 dwc theme cycle                          # sonraki tema
+dwc look mono                            # tüm widget'lar bu görünümde
 dwc list                                 # düzen JSON olarak
 dwc hide                                 # tüm widget'ları gizle (dwc unhide geri getirir)
 dwc pause                                # tüm veri kaynaklarını durdur

@@ -11,7 +11,7 @@ import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCS = os.path.join(ROOT, "docs")
-SHOTS = ("editor", "tour", "media-pill", "media-scope", "clock-led-ring", "clock-poster-cut", "weather", "cpu-graph")
+SHOTS = ("editor", "tour", "media-pill", "media-scope", "clock-led-ring", "clock-poster-cut", "weather", "cpu-graph", "github-profile")
 
 
 def read(*p):
@@ -35,9 +35,9 @@ class Site(unittest.TestCase):
             self.assertTrue(os.path.isfile(os.path.join(DOCS, ref)), ref)
 
     def test_the_themes_are_the_projects_themes(self):
-        site = re.findall(r"\{ id: '(\w+)', name: '(\w+)', dark: (true|false), card: '(#\w+)', alt: '(#\w+)', fg: '(#\w+)', sub: '(#\w+)', muted: '(#\w+)', acc: '(#\w+)', onAcc: '(#\w+)', acc2: '(#\w+)', track: '(#\w+)'", self.html)
-        proj = re.findall(r'\{ id: "(\w+)",\s+name: "(\w+)",\s+dark: (true|false),\s+card: "(#\w+)", alt: "(#\w+)", fg: "(#\w+)", sub: "(#\w+)", muted: "(#\w+)", acc: "(#\w+)", onAcc: "(#\w+)", acc2: "(#\w+)", track: "(#\w+)"', read("ui", "js", "Themes.js"))
-        self.assertEqual(len(proj), 9)
+        site = re.findall(r"\{ id: '(\w+)', name: '([\w ]+)', dark: (true|false), card: '(#\w+)', alt: '(#\w+)', fg: '(#\w+)', sub: '(#\w+)', muted: '(#\w+)', acc: '(#\w+)', onAcc: '(#\w+)', acc2: '(#\w+)', track: '(#\w+)'", self.html)
+        proj = re.findall(r'\{ id: "(\w+)",\s+name: "([\w ]+)",\s+dark: (true|false),\s+card: "(#\w+)", alt: "(#\w+)", fg: "(#\w+)", sub: "(#\w+)", muted: "(#\w+)", acc: "(#\w+)", onAcc: "(#\w+)", acc2: "(#\w+)", track: "(#\w+)"', read("ui", "js", "Themes.js"))
+        self.assertEqual(len(proj), 23)
         self.assertEqual(site, proj)
 
     def test_every_english_span_has_a_turkish_one(self):

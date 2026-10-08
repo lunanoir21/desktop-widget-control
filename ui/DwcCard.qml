@@ -19,6 +19,8 @@ Item {
     readonly property var dims: Layout.preset(sizeKey)
     readonly property real inset: Math.max(2, Math.round(cellPx * 0.1))
     readonly property var module: Modules.byType(type)
+    // the widget's own look, or the desktop's
+    readonly property string family: card.st.family && card.st.family !== "auto" ? card.st.family : DwcStore.family
 
     width: dims.w * cellPx
     height: dims.h * cellPx
@@ -69,6 +71,7 @@ Item {
             item.cfg = card.cfg;
             item.sizeKey = card.sizeKey;
             item.preview = card.preview;
+            item.family = Qt.binding(function () { return card.family; });
         }
     }
 

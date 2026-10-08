@@ -33,6 +33,8 @@ DwcWidget {
     }
 
     readonly property int rowH: 26
+    // mono and poster draw the box as a plain square; everything else rounds it
+    readonly property bool squareBox: family === "mono" || family === "poster"
 
     DText {
         id: title
@@ -58,18 +60,29 @@ DwcWidget {
 
                 Rectangle {
                     id: box
-                    visible: modelData.kind !== "text"
+                    readonly property bool done: modelData.kind === "done"
+                    // terminal spells the mark out in text instead of drawing a box
+                    visible: modelData.kind !== "text" && root.family !== "term"
                     anchors { left: parent.left; verticalCenter: parent.verticalCenter }
                     width: 15
                     height: 15
-                    radius: 4
-                    color: modelData.kind === "done" ? root.tone("color") : "transparent"
-                    border.width: modelData.kind === "done" ? 0 : 1.5
-                    border.color: DwcTheme.muted
-                    DIcon { visible: modelData.kind === "done"; anchors.centerIn: parent; name: "check"; size: 11; strokeWidth: 2.2; color: DwcTheme.onAcc }
+                    radius: root.family === "std" ? 4 : (root.family === "dots" ? width / 2 : 0)
+                    color: box.done ? (root.squareBox ? DwcTheme.fg : root.tone("color")) : "transparent"
+                    border.width: box.done ? 0 : (root.squareBox ? 1 : 1.5)
+                    border.color: root.squareBox ? DwcTheme.alpha(DwcTheme.fg, 0.3) : DwcTheme.muted
+                    DIcon { visible: box.done && root.family === "std"; anchors.centerIn: parent; name: "check"; size: 11; strokeWidth: 2.2; color: DwcTheme.onAcc }
                 }
                 DText {
-                    anchors { left: box.visible ? box.right : parent.left; leftMargin: box.visible ? 10 : 0; right: parent.right; verticalCenter: parent.verticalCenter }
+                    id: mark
+                    visible: modelData.kind !== "text" && root.family === "term"
+                    anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+                    face: "mono"
+                    font.pixelSize: 13
+                    color: modelData.kind === "done" ? root.tone("color") : DwcTheme.muted
+                    text: modelData.kind === "done" ? "[x]" : "[ ]"
+                }
+                DText {
+                    anchors { left: box.visible ? box.right : mark.visible ? mark.right : parent.left; leftMargin: box.visible || mark.visible ? 10 : 0; right: parent.right; verticalCenter: parent.verticalCenter }
                     font.pixelSize: 13
                     font.strikeout: modelData.kind === "done"
                     color: modelData.kind === "done" ? DwcTheme.muted : DwcTheme.fg

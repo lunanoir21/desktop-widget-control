@@ -101,9 +101,12 @@ class Files(unittest.TestCase):
         self.assertIn("mktemp", data)
         self.assertNotIn("desktop-widget-control-cava.conf", data)
 
-    def test_cover_art_is_local_only(self):
-        """A player-supplied http(s) cover URL must not be fetched."""
-        self.assertIn('indexOf("file:///") === 0', read("ui/widgets/MediaPlayer.qml"))
+    def test_cover_art_is_local_or_from_the_allowed_hosts(self):
+        """A player-supplied http(s) cover URL must not be fetched, except the few image hosts in
+        js/Cover.js, and then only by scripts/cover.sh into the cache (the widget never fetches)."""
+        media = read("ui/widgets/MediaPlayer.qml")
+        self.assertIn('indexOf("file:///") === 0', media)
+        self.assertIn("Cover.allowed", media)
 
     def test_no_machine_specific_paths(self):
         # The project must run for anyone: nothing may point at one person's home.
@@ -168,7 +171,8 @@ class Consistency(unittest.TestCase):
 
     def test_readme_and_changelog_agree_on_the_version(self):
         changelog = read("CHANGELOG.md")
-        version = re.search(r"^## (\d+\.\d+\.\d+)", changelog, re.M).group(1)
+        # an entry still marked "unreleased" sits on top until the release commit; the package is the newest released one
+        version = re.search(r"^## (\d+\.\d+\.\d+) — \d", changelog, re.M).group(1)
         self.assertIn("pkgver=" + version, read("packaging", "PKGBUILD"))
 
 
@@ -190,7 +194,7 @@ class Showcase(unittest.TestCase):
             types |= {w["type"] for w in data["widgets"]}
             sizes |= {(w["type"], w["size"]) for w in data["widgets"]}
             # No two widgets on a page overlap, and all fit a 48x27 screen.
-            pre = {"S": (4, 4), "M": (8, 4), "L": (8, 8), "W": (12, 4), "X": (20, 4)}
+            pre = {"S": (4, 4), "M": (8, 4), "L": (8, 8), "W": (12, 4), "X": (20, 4), "B": (12, 8), "H": (12, 10)}
             rects = [(w["x"], w["y"], *pre[w["size"]]) for w in data["widgets"]]
             for r in rects:
                 self.assertLessEqual(r[0] + r[2], 48)

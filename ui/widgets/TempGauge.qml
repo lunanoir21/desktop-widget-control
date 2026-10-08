@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Shapes
 import ".."
 import "../controls"
 
@@ -24,31 +23,17 @@ DwcWidget {
         x: root.small ? 0 : 0
         anchors.verticalCenter: parent.verticalCenter
 
-        Shape {
-            anchors.fill: parent
-            preferredRendererType: Shape.CurveRenderer
-            ShapePath {
-                strokeColor: DwcTheme.track
-                strokeWidth: root.stroke
-                fillColor: "transparent"
-                capStyle: ShapePath.RoundCap
-                PathAngleArc {
-                    centerX: gauge.width / 2; centerY: gauge.width / 2
-                    radiusX: (gauge.width - root.stroke) / 2; radiusY: (gauge.width - root.stroke) / 2
-                    startAngle: 180; sweepAngle: 180
-                }
-            }
-            ShapePath {
-                strokeColor: root.hot
-                strokeWidth: root.stroke
-                fillColor: "transparent"
-                capStyle: ShapePath.RoundCap
-                PathAngleArc {
-                    centerX: gauge.width / 2; centerY: gauge.width / 2
-                    radiusX: (gauge.width - root.stroke) / 2; radiusY: (gauge.width - root.stroke) / 2
-                    startAngle: 180; sweepAngle: Math.max(0.1, 180 * root.frac)
-                }
-            }
+        // a half circle: the arc of a ring that is as tall as the gauge is wide
+        DRing {
+            anchors.top: parent.top
+            width: parent.width
+            height: parent.width
+            startAngle: 180
+            span: 180
+            value: root.frac
+            color: root.hot
+            stroke: root.stroke
+            keepColor: DwcData.temp >= root.opt("warn", 70)
         }
 
         DText {

@@ -15,7 +15,7 @@ Live widgets for your Wayland desktop, with an editor to place and style them: c
 <img src="docs/screenshots/moss/clock-poster-cut.webp" width="430" alt="The poster clock, cut style">
 <img src="docs/screenshots/moss/weather.webp" width="430" alt="Weather for Istanbul">
 
-[Live site with every module in all nine themes](https://lunanoir21.github.io/desktop-widget-control/)
+[Live site with every module in all 23 themes](https://lunanoir21.github.io/desktop-widget-control/)
 
 </div>
 
@@ -29,11 +29,11 @@ Desktop Widget Control draws widgets on the desktop layer, above your wallpaper 
 <img src="docs/screenshots/moss/editor.webp" width="880" alt="The editor: the widget library on the left, the desktop with a grid in the middle, the inspector for the selected widget on the right">
 </div>
 
-- **17 modules**, each with a few sizes: six clocks, five system monitors, a media player, a calendar, weather, a pomodoro timer, a checklist and Claude / Codex usage limits.
+- **18 modules**, each with a few sizes: six clocks, five system monitors, a media player, a calendar, weather, a pomodoro timer, a checklist, Claude / Codex usage limits and a GitHub profile.
 - **A real editor.** Library with live thumbnails, drag and drop, cell snapping, resize by preset, an inspector generated from each module's options, duplicate, lock, delete, arrow-key nudging.
 - **Styles.** Several modules have a *Style* option in the inspector; it swaps the whole look while the other options keep working.
 - **Everything is an option.** Colours follow the theme or are set by hand; background, opacity, radius, padding, shadow and outline are per widget.
-- **Nine themes**, Turkish and English.
+- **23 themes** (including six monochrome ones), Turkish and English.
 - **Cheap.** Data sources only run while a widget needs them, and are shared between widgets. See [what it costs](#what-it-costs).
 - **Scriptable.** Everything the editor does is also an IPC call, and the layout is one JSON file you can edit by hand (it is picked up live).
 - **Independent.** It needs nothing from the rest of your shell. Fonts are bundled.
@@ -42,7 +42,7 @@ Desktop Widget Control draws widgets on the desktop layer, above your wallpaper 
 
 - [Quickshell](https://quickshell.org), developed and tested on 0.3.1 (Qt 6.11), built with Wayland support (the default).
 - A compositor that supports `wlr-layer-shell`: Hyprland, Sway, river, niri, labwc and most other wlroots-style compositors. (GNOME's Mutter does not.)
-- `curl`, only for the weather widget.
+- `curl`, only for the weather and GitHub profile widgets.
 - `notify-send`, only if you want the pomodoro to notify.
 - [`cava`](https://github.com/karlstav/cava), only for the media player's audio visualizer. Without it the option does nothing and nothing extra runs.
 
@@ -120,13 +120,14 @@ If you already run a Quickshell shell of your own, you do not need a second proc
 | **Network** | S M W | download above, upload below a centre line, on one shared scale (or two plain lines) |
 | **Temperature** | S M | half-circle gauge for the CPU sensor |
 | **Media player** | S M L W X | any MPRIS player (Spotify, mpv, a browser…): cover, title, progress, buttons, and a live cava spectrum woven into the progress bar (or rising softly behind the card); a *Wide strip* style lays it all out in one row, click the bar to seek |
+| **GitHub profile** | M L W X | a public GitHub profile: picture, followers, stars, the contribution calendar with your streak, the languages you use and your top repositories (see [GitHub profile](#github-profile)) |
 | **Calendar** | M L | month grid; today's date beside it when medium |
 | **Weather** | S M L | current conditions and a forecast from Open-Meteo; pick a country and a city from a searchable list |
 | **AI limits** | M W | the 5-hour and weekly limits of Claude and Codex, as twin rings or LED dots (see [AI limits](#ai-limits)) |
 | **Pomodoro** | S M | focus / break timer; click the ring to start |
 | **Notes** | M L | a checklist you can tick on the desktop |
 
-Sizes are grid presets: S is 4×4 cells, M 8×4, L 8×8, W 12×4, and X 20×4 for a strip across the middle of the screen (a cell is 40 px by default, adjustable in Settings). The inspector has *Centre* buttons that put the selected widget in the middle of the screen, horizontally or vertically. Every module's options are listed in [`ui/js/Modules.js`](ui/js/Modules.js), and the inspector is built from that same list.
+Sizes are grid presets: S is 4×4 cells, M 8×4, L 8×8, W 12×4, X 20×4 for a strip across the middle of the screen, and B 12×8 and H 12×10 for cards with room for large type (the GitHub profile uses them) (a cell is 40 px by default, adjustable in Settings). The inspector has *Centre* buttons that put the selected widget in the middle of the screen, horizontally or vertically. Every module's options are listed in [`ui/js/Modules.js`](ui/js/Modules.js), and the inspector is built from that same list.
 
 <div align="center">
 <img src="docs/screenshots/moss/media-scope.webp" width="430" alt="The oscilloscope music player">
@@ -145,9 +146,27 @@ The *AI limits* widget shows how much of the 5-hour and weekly limits you have u
 
 The Claude and OpenAI marks are trademarks of their owners; this project is not affiliated with either company.
 
+## GitHub profile
+
+The *GitHub profile* widget shows a public profile or organisation: the picture, the numbers (followers, repositories, stars, forks), the contribution calendar with the year's total, your current and longest streak, a bar of the languages you use and your top repositories. Type the name in the inspector; there is nothing to sign in to.
+
+- It reads only public pages: the profile and repositories from `api.github.com`, the calendar from `github.com/users/NAME/contributions`. Every read is HTTPS, has a time limit and a size cap, and is cut down to the lines the widget needs (`ui/scripts/github.sh`). It asks again every 15 or 30 minutes, hourly, daily or weekly (the *Refresh* option), only while the widget is visible. Move the pointer over the card and a small button appears with how old the numbers are; press it to read again at once. GitHub allows 60 unauthenticated API reads an hour per address; two are used per refresh, and when GitHub asks you to slow down, the numbers already shown stay.
+- *Use gh login* (off by default) sends the token of the [GitHub CLI](https://cli.github.com) (`gh auth login` once; the widget runs `gh auth token`) to `api.github.com`, and only there. It lifts the limit from 60 to 5,000 reads an hour and draws the calendar from GraphQL, which counts the private contributions your profile shows. The token goes in on standard input, never on a command line, and is not read at all while the option is off. If `gh` is missing or not logged in the pill on the card says so and the public pages are used; a token GitHub refuses is dropped.
+- The picture is saved to `~/.cache/desktop-widget-control/` once a day. Switch the *Picture* option off and nothing is downloaded as a file.
+- Languages are counted by repository (GitHub's API gives a repository's main language, not bytes) and forks are left out unless you turn *Count forks* on. Private repositories and private contributions are not visible without a login, so they are not counted.
+- Sizes: M puts the profile over the calendar, W beside it, L stacks everything with the top repositories, and X adds a column of repositories.
+
+The GitHub mark is a trademark of GitHub, Inc.; this project is not affiliated with it.
+
+## Looks
+
+Five looks: *Standard* is the usual one; *Mono* draws everything in a single colour with hairlines and a mono font; *Dots* is dot-matrix numbers with dotted rings, bars and graphs; *Terminal* is a mono font, blocky bars and stepped graphs; *Poster* is big tight numbers, hairlines and a thin area graph. Every widget has all five, and none of them is a different widget.
+
+The *Look* drop-down in the *Settings* tab of the inspector sets the look for the whole desktop; `dwc look mono` does the same from a terminal or a keybinding. Each widget also carries a *Look* appearance option of its own, *Follow desktop* until you say otherwise, so a single clock can stay standard while the rest go terminal.
+
 ## Themes
 
-`moss` (default), `umbra`, `black`, `graphite`, `paper`, `sand`, `gold`, `amber`, `crimson`. A theme is nine colours in [`ui/js/Themes.js`](ui/js/Themes.js); the tests check that text on the card and on the accent stays readable (WCAG AA) in every one. Colour options inside a widget are *tokens* (primary, secondary, text, muted) that follow the theme, or fixed swatches that do not.
+`moss` (default), `umbra`, `black`, `graphite`, `paper`, `sand`, `gold`, `amber`, `crimson`, then `ocean`, `violet`, `mint`, `rose`, `sunset`, `dusk`, `sky`, `matcha` (new colours) and the monochrome `ink`, `chalk`, `phosphor`, `termamber`, `blueprint`, `sepia`. A theme is nine colour fields in [`ui/js/Themes.js`](ui/js/Themes.js); the tests check that text on the card and on the accent stays readable (WCAG AA) in every one. Colour options inside a widget are *tokens* (primary, secondary, text, muted) that follow the theme, or fixed swatches that do not.
 
 ## Scripting
 
@@ -160,6 +179,7 @@ dwc set clock-led-1 seconds true         # an option (the value is JSON)
 dwc style media-1 radius 24              # an appearance option
 dwc move cpu-graph-1 4 6                 # to grid cell (4, 6)
 dwc theme cycle                          # next theme
+dwc look mono                            # every widget in that look
 dwc list                                 # the layout as JSON
 dwc hide                                 # hide every widget (dwc unhide brings them back)
 dwc pause                                # stop every data source
@@ -214,7 +234,7 @@ ui/
   DwcLayer.qml       the desktop surface          DwcEditor.qml   the editor surface
   DwcFrame/Card      one widget on the desktop    DwcHandle.qml   its handle in the editor
   DwcLibrary/LibCard / DwcInspector / DwcOptionRow   the editor's panels
-  widgets/           the 15 modules, one QML file each
+  widgets/           the 18 modules, one QML file each
   controls/          the small UI kit the editor uses
   js/                Layout, Modules (the catalogue), Themes, Strings, Icons: plain data and maths
   fonts/             bundled, SIL OFL

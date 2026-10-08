@@ -26,7 +26,7 @@ OUT = os.path.join(ROOT, "docs", "screenshots")
 ISTANBUL = {"name": "Istanbul", "admin": "Istanbul", "country": "Türkiye", "cc": "TR", "lat": 41.0138, "lon": 28.9497}
 CELL = 40
 AT = (12, 8)  # grid cell of the widget being shot (clear of any bar)
-SIZES = {"S": (4, 4), "M": (8, 4), "L": (8, 8), "W": (12, 4), "X": (20, 4)}
+SIZES = {"S": (4, 4), "M": (8, 4), "L": (8, 8), "W": (12, 4), "X": (20, 4), "B": (12, 8), "H": (12, 10)}
 
 # (file name, type, size, cfg)
 PLAYERS = [("media-" + s, "media", s, {"look": "card"}) for s in "SML"] + [
@@ -42,7 +42,8 @@ OTHERS = [
     ("cpu-graph", "cpu-graph", "M", {}), ("ram-ring", "ram-ring", "M", {}), ("disk", "disk", "M", {}),
     ("net", "net", "M", {}), ("temp-gauge", "temp-gauge", "S", {}),
     ("calendar", "calendar", "L", {}), ("weather", "weather", "M", {"place": ISTANBUL}),
-    ("pomodoro", "pomodoro", "S", {}), ("notes", "notes", "M", {})]
+    ("pomodoro", "pomodoro", "S", {}), ("notes", "notes", "M", {}),
+    ("github-profile", "github-profile", "B", {"user": "lunanoir21"})]
 
 
 def sh(*a, **k):

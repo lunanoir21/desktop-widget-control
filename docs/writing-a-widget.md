@@ -79,7 +79,13 @@ In `ui/js/Modules.js`, add to `modules`:
 
 If you need a number many widgets might want (another sensor, say), add a source to `ui/DwcData.qml` the way `cpu` is done: a `Timer` with `running: root.active("x")` and an interval from `root.interval("x")`, so it stops when nobody asks. Then the widget says `DwcNeed { source: "x"; interval: 2000 }`. If it is private to the widget, as above, keep it in the widget.
 
-## 4. Check it
+## 4. Looks
+
+A widget is drawn in a *look* (`DwcWidget.family`): `std`, `mono`, `dots`, `term` or `poster`. You get all five for free by drawing with the shared controls — `DText` picks the look's font and numbers, and `DRing`, `DBar` and `DBarGraph` take the look's shape, so there is nothing to add and nothing to test per look.
+
+Only read `root.family` when a look genuinely needs a different shape — a checkbox that is a square in `std` and a dotted box in `dots`, say. Everything else follows the controls.
+
+## 5. Check it
 
 ```sh
 tests/run.sh                      # the catalogue checks catch a missing file, a bad default, a missing translation

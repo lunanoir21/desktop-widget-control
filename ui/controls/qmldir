@@ -13,3 +13,6 @@ DBarGraph 1.0 DBarGraph.qml
 DSpectrum 1.0 DSpectrum.qml
 DWaveProgress 1.0 DWaveProgress.qml
 DPlacePicker 1.0 DPlacePicker.qml
+DHeatmap 1.0 DHeatmap.qml
+DRing 1.0 DRing.qml
+DBar 1.0 DBar.qml

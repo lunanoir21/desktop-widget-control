@@ -190,6 +190,15 @@ Rectangle {
                 DText { color: DwcTheme.sub; text: Themes.byId(DwcStore.themeId).name }
 
                 Item { width: 1; height: 4 }
+                DText { font.pixelSize: 10; font.letterSpacing: 1.2; color: DwcTheme.muted; text: Str.t("set.look").toUpperCase() }
+                DSelect {
+                    width: parent.width
+                    model: Modules.familyChoices.map(function (c) { return { v: c.v, label: Str.pick(c.label) }; })
+                    current: DwcStore.family
+                    onPicked: v => DwcStore.setFamily(v)
+                }
+
+                Item { width: 1; height: 4 }
                 DText { font.pixelSize: 10; font.letterSpacing: 1.2; color: DwcTheme.muted; text: Str.t("set.language").toUpperCase() }
                 DSegmented {
                     model: [{ v: "auto", label: Str.t("set.langAuto") }].concat(Strings.languages)

@@ -27,6 +27,7 @@ Item {
     // ---- saved ---------------------------------------------------------------
     property string themeId: Themes.defaultId
     property string language: "auto"      // "auto" | "en" | "tr"
+    property string family: "std"         // the look of every widget that does not choose its own (Modules.families)
     property int cell: 40                 // px per grid cell
     property var order: []
     property var items: ({})
@@ -277,6 +278,13 @@ Item {
         root.saveSoon();
     }
 
+    function setFamily(f) {
+        if (Modules.families.indexOf(f) < 0)
+            return;
+        root.family = f;
+        root.saveSoon();
+    }
+
     function setLanguage(l) {
         root.language = (l === "en" || l === "tr") ? l : "auto";
         root.saveSoon();
@@ -373,7 +381,7 @@ Item {
             widgets.push({ id: id, type: r.type, size: r.size, x: r.x, y: r.y, screen: r.screen || "",
                            locked: !!r.locked, cfg: r.cfg, st: r.st });
         }
-        return JSON.stringify({ version: root.schema, theme: root.themeId, language: root.language,
+        return JSON.stringify({ version: root.schema, theme: root.themeId, look: root.family, language: root.language,
                                 cell: root.cell, onboarded: root.onboarded, widgets: widgets }, null, 2) + "\n";
     }
 
@@ -416,6 +424,7 @@ Item {
             order.push(id);
         }
         root.themeId = Themes.exists(data.theme) ? data.theme : Themes.defaultId;
+        root.family = Modules.families.indexOf(data.look) >= 0 ? data.look : "std";
         root.language = data.language === "en" || data.language === "tr" ? data.language : "auto";
         root.cell = Math.max(root.minCell, Math.min(root.maxCell, Math.round(Number(data.cell) || 40)));
         // A layout saved before the tour existed counts as seen; `dwc tour` shows it again.
